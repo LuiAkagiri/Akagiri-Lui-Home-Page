@@ -262,40 +262,27 @@ function HeroBackground() {
     const el = waterRef.current;
     if (!el) return;
 
-    const $el = $(el) as any;
-
-    $el.ripples({
-      imageUrl: avatarSrc,
-      resolution: 384,
-      dropRadius: 25,
-      perturbance: 0.03,
-      interactive: false, // decorative one-shot effect, not mouse-reactive
-    });
-
-    // Let the water settle for a beat, then a single drop lands at the center
-    const rect = el.getBoundingClientRect();
-    const dropTimer = window.setTimeout(() => {
-      try {
-        $el.ripples("drop", rect.width / 2, rect.height / 2, 70, 0.08);
-      } catch {
-        // WebGL unsupported or element gone — fail silently, static bg remains
-      }
-    }, 250);
+    // Matches the plugin's standard usage: element has a CSS background-image,
+    // then $(el).ripples() is called with no extra options (mouse-interactive by default).
+    try {
+      ($(el) as any).ripples();
+    } catch (err) {
+      console.error("jquery.ripples failed to initialize:", err);
+    }
 
     return () => {
-      window.clearTimeout(dropTimer);
       try {
-        $el.ripples("destroy");
+        ($(el) as any).ripples("destroy");
       } catch {
-        // already unmounted
+        // never initialized, or already unmounted
       }
     };
   }, []);
 
   return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {/* Waveform strip */}
-      <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 flex items-center justify-center gap-[3px] opacity-[0.07] z-10">
+    <div className="absolute inset-0 overflow-hidden">
+      {/* Waveform strip — purely decorative, never intercepts the mouse */}
+      <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 flex items-center justify-center gap-[3px] opacity-[0.07] pointer-events-none z-10">
         {bars.map((h, i) => (
           <div
             key={i}
@@ -305,16 +292,16 @@ function HeroBackground() {
         ))}
       </div>
 
-      {/* Real water-ripple effect (jQuery Ripples / WebGL) applied to the profile illustration.
+      {/* Real water-ripple effect (jQuery Ripples / WebGL), mouse-interactive.
           Fades in starting slightly before the text block. */}
       <div
         ref={waterRef}
         className="absolute inset-0"
         style={{
           backgroundImage: `url(${avatarSrc})`,
-          backgroundSize: "100% auto",
-          backgroundPosition: "center center",
+          backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
+          backgroundSize: "cover",
           filter: "blur(20px)",
           animation: "heroBgFadeIn 1s cubic-bezier(0.22,1,0.36,1) both",
         }}
