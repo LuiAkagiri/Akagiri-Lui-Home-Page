@@ -13,6 +13,9 @@ import {
 } from "lucide-react";
 import { ImageWithFallback } from "@/app/components/figma/ImageWithFallback";
 import avatarSrc from "@/imports/SNS____.png";
+import $ from "jquery";
+// @ts-ignore - no type definitions published for this plugin
+import "jquery.ripples";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -253,79 +256,74 @@ function HeroBackground() {
     return 8 + frac * 84; // height % between 8 and 92
   });
 
+  const waterRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = waterRef.current;
+    if (!el) return;
+
+    const $el = $(el) as any;
+
+    $el.ripples({
+      imageUrl: avatarSrc,
+      resolution: 384,
+      dropRadius: 25,
+      perturbance: 0.03,
+      interactive: false, // decorative one-shot effect, not mouse-reactive
+    });
+
+    // Let the water settle for a beat, then a single drop lands at the center
+    const rect = el.getBoundingClientRect();
+    const dropTimer = window.setTimeout(() => {
+      try {
+        $el.ripples("drop", rect.width / 2, rect.height / 2, 70, 0.08);
+      } catch {
+        // WebGL unsupported or element gone — fail silently, static bg remains
+      }
+    }, 250);
+
+    return () => {
+      window.clearTimeout(dropTimer);
+      try {
+        $el.ripples("destroy");
+      } catch {
+        // already unmounted
+      }
+    };
+  }, []);
+
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {/* Drop impact point at center */}
-      <span
-        className="absolute rounded-full bg-[#C41E3A]"
+      {/* Waveform strip */}
+      <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 flex items-center justify-center gap-[3px] opacity-[0.07] z-10">
+        {bars.map((h, i) => (
+          <div
+            key={i}
+            className="w-[3px] bg-[#C41E3A] rounded-full"
+            style={{ height: `${h}%` }}
+          />
+        ))}
+      </div>
+
+      {/* Real water-ripple effect (jQuery Ripples / WebGL) applied to the profile illustration.
+          Fades in starting slightly before the text block. */}
+      <div
+        ref={waterRef}
+        className="absolute inset-0"
         style={{
-          width: 10,
-          height: 10,
-          left: "50%",
-          top: "50%",
-          transform: "translate(-50%, -50%)",
-          opacity: 0,
-          animation: "dropImpact 0.5s ease-out 0ms forwards",
+          backgroundImage: `url(${avatarSrc})`,
+          backgroundSize: "100% auto",
+          backgroundPosition: "center center",
+          backgroundRepeat: "no-repeat",
+          filter: "blur(20px)",
+          animation: "heroBgFadeIn 1s cubic-bezier(0.22,1,0.36,1) both",
         }}
       />
 
-      {/* Ripple rings expanding outward from the drop point */}
-      {[0, 1, 2].map((i) => (
-        <span
-          key={i}
-          className="absolute rounded-full border border-[#C41E3A]"
-          style={{
-            width: 20,
-            height: 20,
-            left: "50%",
-            top: "50%",
-            transform: "translate(-50%, -50%) scale(0.2)",
-            opacity: 0,
-            animation: `rippleRing 1.9s cubic-bezier(0.16,1,0.3,1) ${350 + i * 260}ms forwards`,
-          }}
-        />
-      ))}
-
-      {/* Background content — revealed by an expanding circle that follows the ripple */}
-      <div
-        className="absolute inset-0"
-        style={{
-          animation: "rippleReveal 1.9s cubic-bezier(0.65,0,0.35,1) 350ms both",
-        }}
-      >
-        {/* Waveform strip */}
-        <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 flex items-center justify-center gap-[3px] opacity-[0.07]">
-          {bars.map((h, i) => (
-            <div
-              key={i}
-              className="w-[3px] bg-[#C41E3A] rounded-full"
-              style={{ height: `${h}%` }}
-            />
-          ))}
-        </div>
-        {/* Giant profile illustration as background — full width, height cropped to section bounds */}
-        <ImageWithFallback
-          src={avatarSrc}
-          alt=""
-          aria-hidden="true"
-          className="absolute left-0 top-1/2 w-full h-auto -translate-y-1/2 object-cover"
-          style={{ opacity: 0.07, filter: "blur(6px)" }}
-        />
-      </div>
-
       <style>{`
-        @keyframes dropImpact {
-          0%   { opacity: 0.9; transform: translate(-50%, -50%) scale(0.4); }
-          100% { opacity: 0; transform: translate(-50%, -50%) scale(2.4); }
-        }
-        @keyframes rippleRing {
-          0%   { transform: translate(-50%, -50%) scale(0.2); opacity: 0.45; border-width: 2px; }
-          70%  { opacity: 0.12; }
-          100% { transform: translate(-50%, -50%) scale(45); opacity: 0; border-width: 0.5px; }
-        }
-        @keyframes rippleReveal {
-          from { clip-path: circle(0% at 50% 50%); }
-          to   { clip-path: circle(85% at 50% 50%); }
+        @keyframes heroBgFadeIn {
+          from { opacity: 0; }
+          to   { opacity: 0.25; }
         }
       `}</style>
     </div>
@@ -345,7 +343,7 @@ function Hero() {
         className="absolute inset-0 z-[5] pointer-events-none"
         style={{
           background:
-            "radial-gradient(ellipse 60% 55% at 50% 50%, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0) 70%)",
+            "radial-gradient(ellipse 60% 45% at 50% 50%, rgba(255,255,255,0.85) 50%, rgba(255,255,255,0) 80%)",
         }}
       />
 
@@ -353,7 +351,7 @@ function Hero() {
         <div
           style={{
             opacity: 1,
-            animation: "heroFadeIn 1s cubic-bezier(0.22,1,0.36,1) both",
+            animation: "heroFadeIn 1s cubic-bezier(0.22,1,0.36,1) 300ms both",
           }}
         >
           <div className="inline-flex items-center gap-2 mb-6">
