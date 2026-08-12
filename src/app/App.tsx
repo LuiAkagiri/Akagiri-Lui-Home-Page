@@ -26,15 +26,8 @@ interface Song {
   badge?: string;
 }
 
-type GenreTab =
-  "All" | "J-POP" | "ロック" | "VTuber" | "アイドル";
-const ALL_TABS: GenreTab[] = [
-  "All",
-  "J-POP",
-  "ロック",
-  "VTuber",
-  "アイドル",
-];
+type GenreTab = "All" | "J-POP" | "ロック" | "VTuber" | "アイドル";
+const ALL_TABS: GenreTab[] = ["All", "J-POP", "ロック", "VTuber", "アイドル"];
 
 // ─── Data ────────────────────────────────────────────────────────────────────
 
@@ -83,7 +76,7 @@ function useInView(threshold = 0.12) {
           obs.unobserve(el);
         }
       },
-      { threshold },
+      { threshold }
     );
     obs.observe(el);
     return () => obs.disconnect();
@@ -110,9 +103,7 @@ function FadeIn({
       className={className}
       style={{
         opacity: inView ? 1 : 0,
-        transform: inView
-          ? "translateY(0)"
-          : "translateY(18px)",
+        transform: inView ? "translateY(0)" : "translateY(18px)",
         transition: `opacity 2s cubic-bezier(0.16,1,0.3,1) ${delay}ms, transform 2s cubic-bezier(0.16,1,0.3,1) ${delay}ms`,
       }}
     >
@@ -137,10 +128,7 @@ function SongCard({ song }: { song: Song }) {
   return (
     <article className="flex flex-col bg-card border border-border overflow-hidden group transition-shadow hover:shadow-[0_4px_24px_rgba(0,0,0,0.08)]">
       {/* 16:9 YouTube embed */}
-      <div
-        className="relative w-full bg-muted"
-        style={{ paddingTop: "56.25%" }}
-      >
+      <div className="relative w-full bg-muted" style={{ paddingTop: "56.25%" }}>
         <iframe
           src={`https://www.youtube.com/embed/${song.youtubeId}`}
           title={song.title}
@@ -160,9 +148,7 @@ function SongCard({ song }: { song: Song }) {
           <h3 className="text-base font-bold text-foreground leading-snug mb-1">
             {song.title}
           </h3>
-          <p className="text-xs font-light text-muted-foreground">
-            {song.client}
-          </p>
+          <p className="text-xs font-light text-muted-foreground">{song.client}</p>
         </div>
         <span className="self-start text-[10px] font-medium bg-secondary text-muted-foreground px-2 py-0.5 tracking-wide">
           {song.genre}
@@ -187,14 +173,10 @@ function Nav({
     if (currentPage !== "/") {
       navigate("/");
       setTimeout(() => {
-        document
-          .getElementById("contact")
-          ?.scrollIntoView({ behavior: "smooth" });
+        document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" });
       }, 80);
     } else {
-      document
-        .getElementById("contact")
-        ?.scrollIntoView({ behavior: "smooth" });
+      document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" });
     }
   };
 
@@ -219,10 +201,7 @@ function Nav({
           {links.map(({ label, action }) => (
             <button
               key={label}
-              onClick={() => {
-                action();
-                setMenuOpen(false);
-              }}
+              onClick={() => { action(); setMenuOpen(false); }}
               className="text-xs font-medium tracking-widest text-muted-foreground hover:text-foreground transition-colors"
             >
               {label}
@@ -252,10 +231,7 @@ function Nav({
           {links.map(({ label, action }) => (
             <button
               key={label}
-              onClick={() => {
-                action();
-                setMenuOpen(false);
-              }}
+              onClick={() => { action(); setMenuOpen(false); }}
               className="text-left text-sm font-medium tracking-wide text-foreground hover:text-[#C41E3A] transition-colors"
             >
               {label}
@@ -279,51 +255,42 @@ function HeroBackground() {
 
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {/* SVG filter: water-like distortion that settles from turbulent to calm on load */}
-      <svg
-        style={{ position: "absolute", width: 0, height: 0 }}
-        aria-hidden="true"
-      >
-        <defs>
-          <filter id="heroWaterRipple">
-            <feTurbulence
-              type="fractalNoise"
-              baseFrequency="0.012"
-              numOctaves={2}
-              seed={7}
-              result="turbulence"
-            >
-              <animate
-                attributeName="baseFrequency"
-                values="0.045;0.006"
-                dur="2.4s"
-                begin="0.1s"
-                fill="freeze"
-              />
-            </feTurbulence>
-            <feDisplacementMap
-              in="SourceGraphic"
-              in2="turbulence"
-              scale={70}
-            >
-              <animate
-                attributeName="scale"
-                values="70;0"
-                dur="2.4s"
-                begin="0.1s"
-                fill="freeze"
-              />
-            </feDisplacementMap>
-          </filter>
-        </defs>
-      </svg>
+      {/* Drop impact point at center */}
+      <span
+        className="absolute rounded-full bg-[#C41E3A]"
+        style={{
+          width: 10,
+          height: 10,
+          left: "50%",
+          top: "50%",
+          transform: "translate(-50%, -50%)",
+          opacity: 0,
+          animation: "dropImpact 0.5s ease-out 0ms forwards",
+        }}
+      />
 
-      {/* Background content — fades in while the water-ripple filter settles */}
+      {/* Ripple rings expanding outward from the drop point */}
+      {[0, 1, 2].map((i) => (
+        <span
+          key={i}
+          className="absolute rounded-full border border-[#C41E3A]"
+          style={{
+            width: 20,
+            height: 20,
+            left: "50%",
+            top: "50%",
+            transform: "translate(-50%, -50%) scale(0.2)",
+            opacity: 0,
+            animation: `rippleRing 1.9s cubic-bezier(0.16,1,0.3,1) ${350 + i * 260}ms forwards`,
+          }}
+        />
+      ))}
+
+      {/* Background content — revealed by an expanding circle that follows the ripple */}
       <div
         className="absolute inset-0"
         style={{
-          animation:
-            "heroBgFadeIn 2s cubic-bezier(0.16,1,0.3,1) 100ms both",
+          animation: "rippleReveal 1.9s cubic-bezier(0.65,0,0.35,1) 350ms both",
         }}
       >
         {/* Waveform strip */}
@@ -336,23 +303,29 @@ function HeroBackground() {
             />
           ))}
         </div>
-        {/* Giant profile illustration as background — full width, height cropped to section bounds, ripples on load */}
+        {/* Giant profile illustration as background — full width, height cropped to section bounds */}
         <ImageWithFallback
           src={avatarSrc}
           alt=""
           aria-hidden="true"
           className="absolute left-0 top-1/2 w-full h-auto -translate-y-1/2 object-cover"
-          style={{
-            opacity: 0.25,
-            filter: "blur(20px) url(#heroWaterRipple)",
-          }}
+          style={{ opacity: 0.07, filter: "blur(6px)" }}
         />
       </div>
 
       <style>{`
-        @keyframes heroBgFadeIn {
-          from { opacity: 0; }
-          to   { opacity: 1; }
+        @keyframes dropImpact {
+          0%   { opacity: 0.9; transform: translate(-50%, -50%) scale(0.4); }
+          100% { opacity: 0; transform: translate(-50%, -50%) scale(2.4); }
+        }
+        @keyframes rippleRing {
+          0%   { transform: translate(-50%, -50%) scale(0.2); opacity: 0.45; border-width: 2px; }
+          70%  { opacity: 0.12; }
+          100% { transform: translate(-50%, -50%) scale(45); opacity: 0; border-width: 0.5px; }
+        }
+        @keyframes rippleReveal {
+          from { clip-path: circle(0% at 50% 50%); }
+          to   { clip-path: circle(85% at 50% 50%); }
         }
       `}</style>
     </div>
@@ -372,7 +345,7 @@ function Hero() {
         className="absolute inset-0 z-[5] pointer-events-none"
         style={{
           background:
-            "radial-gradient(ellipse 60% 45% at 50% 50%, rgba(255,255,255,0.85) 50%, rgba(255,255,255,0) 80%)",
+            "radial-gradient(ellipse 60% 55% at 50% 50%, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0) 70%)",
         }}
       />
 
@@ -380,16 +353,11 @@ function Hero() {
         <div
           style={{
             opacity: 1,
-            animation:
-              "heroFadeIn 1s cubic-bezier(0.22,1,0.36,1) both",
+            animation: "heroFadeIn 1s cubic-bezier(0.22,1,0.36,1) both",
           }}
         >
           <div className="inline-flex items-center gap-2 mb-6">
-            <Music2
-              size={16}
-              className="text-[#C41E3A]"
-              strokeWidth={2}
-            />
+            <Music2 size={16} className="text-[#C41E3A]" strokeWidth={2} />
             <span className="text-base sm:text-lg font-bold tracking-[0.15em] text-foreground">
               作曲家 - 赤桐ルイ
             </span>
@@ -398,17 +366,12 @@ function Hero() {
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-black leading-[1.2] tracking-tight text-foreground mt-2">
             TikTokでの制作楽曲の使用
             <br />
-            <em className="not-italic text-[#C41E3A]">
-              3,700件
-            </em>
-            を突破。
+            <em className="not-italic text-[#C41E3A]">3,700件</em>を突破。
           </h1>
 
           <p className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight text-foreground mt-3">
             累計再生回数は
-            <em className="not-italic text-[#C41E3A]">
-              120万回
-            </em>
+            <em className="not-italic text-[#C41E3A]">120万回</em>
             を記録。
           </p>
 
@@ -423,19 +386,13 @@ function Hero() {
       {/* Scroll arrow */}
       <button
         onClick={() =>
-          document
-            .getElementById("profile")
-            ?.scrollIntoView({ behavior: "smooth" })
+          document.getElementById("profile")?.scrollIntoView({ behavior: "smooth" })
         }
         className="absolute bottom-10 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-1.5 text-muted-foreground hover:text-[#C41E3A] transition-colors"
-        style={{
-          animation: "scrollBounce 2s ease-in-out infinite",
-        }}
+        style={{ animation: "scrollBounce 2s ease-in-out infinite" }}
         aria-label="Scroll down"
       >
-        <span className="text-[9px] tracking-[0.3em] font-bold">
-          SCROLL
-        </span>
+        <span className="text-[9px] tracking-[0.3em] font-bold">SCROLL</span>
         <ChevronDown size={16} />
       </button>
 
@@ -457,10 +414,7 @@ function Hero() {
 
 function Profile() {
   return (
-    <section
-      id="profile"
-      className="py-32 px-6 border-t border-border"
-    >
+    <section id="profile" className="py-32 px-6 border-t border-border">
       <div className="max-w-5xl mx-auto">
         <FadeIn className="flex flex-col md:flex-row items-center md:items-center gap-12 md:gap-16">
           {/* Avatar circle — swap src when image is provided */}
@@ -529,16 +483,10 @@ function AppealPoints() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-border">
           {points.map(({ icon, title, body, delay }) => (
-            <FadeIn
-              key={title}
-              delay={delay}
-              className="bg-background"
-            >
+            <FadeIn key={title} delay={delay} className="bg-background">
               <div className="p-8 h-full">
                 <div className="flex items-center gap-3 mb-3">
-                  <span className="text-[#C41E3A] flex-shrink-0">
-                    {icon}
-                  </span>
+                  <span className="text-[#C41E3A] flex-shrink-0">{icon}</span>
                   <h3 className="text-base font-bold text-foreground leading-snug">
                     {title}
                   </h3>
@@ -557,11 +505,7 @@ function AppealPoints() {
 
 // ─── Music Section ────────────────────────────────────────────────────────────
 
-function MusicSection({
-  navigate,
-}: {
-  navigate: (p: string) => void;
-}) {
+function MusicSection({ navigate }: { navigate: (p: string) => void }) {
   return (
     <section className="py-32 px-6 border-t border-border">
       <div className="max-w-5xl mx-auto">
@@ -599,9 +543,7 @@ function MusicSection({
 function Contact() {
   const [submitted, setSubmitted] = useState(false);
 
-  const handleSubmit = (
-    e: React.FormEvent<HTMLFormElement>,
-  ) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     // TODO: replace action with Formspree endpoint
     const form = e.currentTarget;
@@ -653,10 +595,7 @@ function Contact() {
               href="mailto:lui.music.work@gmail.com"
               className="flex-1 flex items-center gap-3 border border-[#C41E3A] px-5 py-4 hover:bg-[#C41E3A] hover:text-white transition-colors group"
             >
-              <Mail
-                size={18}
-                className="text-[#C41E3A] group-hover:text-white flex-shrink-0"
-              />
+              <Mail size={18} className="text-[#C41E3A] group-hover:text-white flex-shrink-0" />
               <span className="text-sm font-medium tracking-wide truncate">
                 lui.music.work@gmail.com
               </span>
@@ -667,13 +606,8 @@ function Contact() {
               rel="noopener noreferrer"
               className="flex-1 flex items-center gap-3 border border-[#C41E3A] px-5 py-4 hover:bg-[#C41E3A] hover:text-white transition-colors group"
             >
-              <Twitter
-                size={18}
-                className="text-[#C41E3A] group-hover:text-white flex-shrink-0"
-              />
-              <span className="text-sm font-medium tracking-wide">
-                @Akagiri_Lui
-              </span>
+              <Twitter size={18} className="text-[#C41E3A] group-hover:text-white flex-shrink-0" />
+              <span className="text-sm font-medium tracking-wide">@Akagiri_Lui</span>
             </a>
           </div>
         </FadeIn>
@@ -689,66 +623,32 @@ function Contact() {
               </p>
             </div>
           ) : (
-            <form
-              onSubmit={handleSubmit}
-              className="flex flex-col gap-5"
-            >
+            <form onSubmit={handleSubmit} className="flex flex-col gap-5">
               {(
                 [
-                  {
-                    name: "name",
-                    label: "お名前",
-                    type: "text",
-                    placeholder: "山田 太郎",
-                    required: true,
-                  },
-                  {
-                    name: "affiliation",
-                    label: "ご所属",
-                    type: "text",
-                    placeholder: "〇〇プロダクション",
-                    required: false,
-                  },
-                  {
-                    name: "email",
-                    label: "メールアドレス",
-                    type: "email",
-                    placeholder: "example@mail.com",
-                    required: true,
-                  },
+                  { name: "name", label: "お名前", type: "text", placeholder: "山田 太郎", required: true },
+                  { name: "affiliation", label: "ご所属", type: "text", placeholder: "〇〇プロダクション", required: false },
+                  { name: "email", label: "メールアドレス", type: "email", placeholder: "example@mail.com", required: true },
                 ] as const
-              ).map(
-                ({
-                  name,
-                  label,
-                  type,
-                  placeholder,
-                  required,
-                }) => (
-                  <div key={name}>
-                    <label className="block text-[10px] font-bold tracking-[0.2em] text-foreground mb-2">
-                      {label}
-                      {required && (
-                        <span className="text-[#C41E3A] ml-1">
-                          *
-                        </span>
-                      )}
-                    </label>
-                    <input
-                      type={type}
-                      name={name}
-                      required={required}
-                      placeholder={placeholder}
-                      className="w-full border border-border bg-background px-4 py-3 text-sm font-light text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#C41E3A] transition-colors"
-                    />
-                  </div>
-                ),
-              )}
+              ).map(({ name, label, type, placeholder, required }) => (
+                <div key={name}>
+                  <label className="block text-[10px] font-bold tracking-[0.2em] text-foreground mb-2">
+                    {label}
+                    {required && <span className="text-[#C41E3A] ml-1">*</span>}
+                  </label>
+                  <input
+                    type={type}
+                    name={name}
+                    required={required}
+                    placeholder={placeholder}
+                    className="w-full border border-border bg-background px-4 py-3 text-sm font-light text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#C41E3A] transition-colors"
+                  />
+                </div>
+              ))}
 
               <div>
                 <label className="block text-[10px] font-bold tracking-[0.2em] text-foreground mb-2">
-                  お問い合わせ内容{" "}
-                  <span className="text-[#C41E3A]">*</span>
+                  お問い合わせ内容 <span className="text-[#C41E3A]">*</span>
                 </label>
                 <textarea
                   name="message"
@@ -775,27 +675,17 @@ function Contact() {
 
 // ─── Footer ──────────────────────────────────────────────────────────────────
 
-function Footer({
-  navigate,
-}: {
-  navigate: (p: string) => void;
-}) {
+function Footer({ navigate }: { navigate: (p: string) => void }) {
   return (
     <footer className="border-t border-border py-10 px-6">
       <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-light text-muted-foreground">
         <button
-          onClick={() => {
-            navigate("/");
-            window.scrollTo({ top: 0, behavior: "smooth" });
-          }}
+          onClick={() => { navigate("/"); window.scrollTo({ top: 0, behavior: "smooth" }); }}
           className="font-black tracking-[0.2em] text-foreground hover:text-[#C41E3A] transition-colors text-sm"
         >
           赤桐ルイ
         </button>
-        <p>
-          © {new Date().getFullYear()} 赤桐ルイ. All rights
-          reserved.
-        </p>
+        <p>© {new Date().getFullYear()} 赤桐ルイ. All rights reserved.</p>
         <div className="flex items-center gap-5">
           <button
             onClick={() => navigate("/works")}
@@ -807,9 +697,7 @@ function Footer({
             onClick={() => {
               navigate("/");
               setTimeout(() => {
-                document
-                  .getElementById("contact")
-                  ?.scrollIntoView({ behavior: "smooth" });
+                document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" });
               }, 80);
             }}
             className="hover:text-foreground transition-colors"
@@ -824,11 +712,7 @@ function Footer({
 
 // ─── Home Page ────────────────────────────────────────────────────────────────
 
-function HomePage({
-  navigate,
-}: {
-  navigate: (p: string) => void;
-}) {
+function HomePage({ navigate }: { navigate: (p: string) => void }) {
   return (
     <>
       <Hero />
@@ -883,10 +767,7 @@ function WorksPage() {
         {filtered.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
             {filtered.map((song, i) => (
-              <FadeIn
-                key={`${activeTab}-${song.id}`}
-                delay={i * 70}
-              >
+              <FadeIn key={`${activeTab}-${song.id}`} delay={i * 70}>
                 <SongCard song={song} />
               </FadeIn>
             ))}
@@ -905,7 +786,7 @@ function WorksPage() {
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState(
-    () => window.location.pathname,
+    () => window.location.pathname
   );
 
   const navigate = (path: string) => {
@@ -916,8 +797,7 @@ export default function App() {
   };
 
   useEffect(() => {
-    const onPop = () =>
-      setCurrentPage(window.location.pathname);
+    const onPop = () => setCurrentPage(window.location.pathname);
     window.addEventListener("popstate", onPop);
     return () => window.removeEventListener("popstate", onPop);
   }, []);
