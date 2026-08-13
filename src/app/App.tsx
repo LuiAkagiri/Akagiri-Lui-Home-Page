@@ -273,8 +273,8 @@ function HeroBackground() {
 
     const rippleOptions = { 
       resolution: 384,
-      dropRadius: 40,
-      perturbance: 0.01,
+      dropRadius: 30,
+      perturbance: 0.02,
     };
 
     const initRipples = () => {
