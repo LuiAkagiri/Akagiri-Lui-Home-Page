@@ -258,28 +258,20 @@ function HeroBackground() {
 
   const containerRef = useRef<HTMLDivElement>(null);
   const waterRef = useRef<HTMLDivElement>(null);
-  const calmRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const container = containerRef.current;
     const el = waterRef.current;
-    const calm = calmRef.current;
-    if (!container || !el || !calm) return;
+    if (!container || !el) return;
 
     let ripplesInitialized = false;
     let idleTimer: number | undefined;
 
-    // Resting opacity of the water layer (matches the heroBgFadeIn keyframes below).
-    const REST_OPACITY = 0.35;
+    // How long the mouse must sit still before the ripples are force-calmed.
+    // Raise this for a longer "lingering" effect, lower it to settle sooner.
+    const IDLE_MS = 800;
 
-    // How long the mouse must sit still before the water starts settling.
-    const IDLE_MS = 1400;
-    // How slowly the calm overlay fades IN (settling down) once idle.
-    const FADE_TO_CALM_MS = 1800;
-    // How quickly the calm overlay fades OUT (revealing ripples) on interaction.
-    const FADE_TO_ACTIVE_MS = 350;
-
-    const rippleOptions = {
+    const rippleOptions = { 
       resolution: 384,
       dropRadius: 30,
       perturbance: 0.05,
@@ -294,25 +286,23 @@ function HeroBackground() {
       }
     };
 
-    // Instead of destroying/reinitializing the simulation (which snaps back
-    // instantly and looks abrupt), we crossfade a static "calm" copy of the
-    // image on top of the live ripple canvas. Settling = fade calm layer IN.
-    // Interacting again = fade calm layer OUT. The underlying physics never
-    // resets, so there's no pop — just a smooth visual transition.
-    const showCalm = () => {
-      calm.style.transition = `opacity ${FADE_TO_CALM_MS}ms ease`;
-      calm.style.opacity = String(REST_OPACITY);
-    };
-
-    const showRipples = () => {
-      calm.style.transition = `opacity ${FADE_TO_ACTIVE_MS}ms ease`;
-      calm.style.opacity = "0";
+    // The plugin has no built-in "settle faster" option — the wave decay rate is
+    // fixed internally. So instead we detect mouse inactivity and force a reset
+    // (destroy + reinit), which snaps the simulation back to flat/calm.
+    const calmDown = () => {
+      if (!ripplesInitialized) return;
+      try {
+        ($(el) as any).ripples("destroy");
+      } catch {
+        // ignore
+      }
+      ripplesInitialized = false;
+      initRipples();
     };
 
     const handleActivity = () => {
-      showRipples();
       if (idleTimer) window.clearTimeout(idleTimer);
-      idleTimer = window.setTimeout(showCalm, IDLE_MS);
+      idleTimer = window.setTimeout(calmDown, IDLE_MS);
     };
 
     // Manually compute a "cover" fit in JS (width/height in real px) instead of
@@ -326,12 +316,8 @@ function HeroBackground() {
       const ih = img.naturalHeight;
       if (!iw || !ih || !cw || !ch) return;
       const scale = Math.max(cw / iw, ch / ih);
-      const w = `${Math.ceil(iw * scale)}px`;
-      const h = `${Math.ceil(ih * scale)}px`;
-      el.style.width = w;
-      el.style.height = h;
-      calm.style.width = w;
-      calm.style.height = h;
+      el.style.width = `${Math.ceil(iw * scale)}px`;
+      el.style.height = `${Math.ceil(ih * scale)}px`;
       if (ripplesInitialized) {
         try {
           ($(el) as any).ripples("updateSize");
@@ -378,9 +364,10 @@ function HeroBackground() {
         ))}
       </div>
 
-      {/* Live water-ripple canvas (always running underneath), mouse-interactive.
+      {/* Real water-ripple effect (jQuery Ripples / WebGL), mouse-interactive.
           Sized in JS to exactly cover the container (see fitCover above), then
-          stretched 1:1 via background-size so the plugin never has to crop/tile it. */}
+          stretched 1:1 via background-size so the plugin never has to crop/tile it.
+          Fades in starting slightly before the text block. */}
       <div
         ref={waterRef}
         className="absolute top-1/2 left-1/2"
@@ -392,22 +379,6 @@ function HeroBackground() {
           backgroundSize: "100% 100%",
           filter: "blur(20px)",
           animation: "heroBgFadeIn 1s cubic-bezier(0.22,1,0.36,1) both",
-        }}
-      />
-
-      {/* Static "calm" overlay — smoothly crossfades in when idle to visually
-          settle the water, and fades back out the moment the mouse moves again. */}
-      <div
-        ref={calmRef}
-        className="absolute top-1/2 left-1/2 pointer-events-none"
-        style={{
-          transform: "translate(-50%, -50%)",
-          backgroundImage: `url(${avatarSrc})`,
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
-          backgroundSize: "100% 100%",
-          filter: "blur(20px)",
-          opacity: 0,
         }}
       />
 
