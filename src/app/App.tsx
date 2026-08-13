@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import {
   ChevronDown,
   Menu,
@@ -267,21 +268,53 @@ function SongCard({
 function ThumbMarquee({ songs }: { songs: Song[] }) {
   const track = [...songs, ...songs]; // duplicated for a seamless loop
   const [activeSong, setActiveSong] = useState<Song | null>(null);
+  const [closing, setClosing] = useState(false);
+  const closeTimerRef = useRef<number | undefined>(undefined);
 
-  // Lock background scroll and allow Escape to close while the popup is open.
+  // Both open and close share this duration so the motion feels symmetrical.
+  const TRANSITION_MS = 800;
+
+  const openSong = (song: Song) => {
+    if (closeTimerRef.current) window.clearTimeout(closeTimerRef.current);
+    setClosing(false);
+    setActiveSong(song);
+  };
+
+  const closeSong = () => {
+    setClosing(true);
+    closeTimerRef.current = window.setTimeout(() => {
+      setActiveSong(null);
+      setClosing(false);
+    }, TRANSITION_MS);
+  };
+
+  // Lock background scroll while the popup is open, but compensate for the
+  // scrollbar disappearing (which otherwise shifts the whole page sideways).
   useEffect(() => {
     if (!activeSong) return;
+    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
     const prevOverflow = document.body.style.overflow;
+    const prevPaddingRight = document.body.style.paddingRight;
     document.body.style.overflow = "hidden";
+    if (scrollbarWidth > 0) {
+      document.body.style.paddingRight = `${scrollbarWidth}px`;
+    }
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setActiveSong(null);
+      if (e.key === "Escape") closeSong();
     };
     window.addEventListener("keydown", onKey);
     return () => {
       document.body.style.overflow = prevOverflow;
+      document.body.style.paddingRight = prevPaddingRight;
       window.removeEventListener("keydown", onKey);
     };
   }, [activeSong]);
+
+  useEffect(() => {
+    return () => {
+      if (closeTimerRef.current) window.clearTimeout(closeTimerRef.current);
+    };
+  }, []);
 
   return (
     <div className="relative overflow-hidden">
@@ -292,7 +325,7 @@ function ThumbMarquee({ songs }: { songs: Song[] }) {
         {track.map((song, i) => (
           <button
             key={`${song.id}-${i}`}
-            onClick={() => setActiveSong(song)}
+            onClick={() => openSong(song)}
             className="w-36 sm:w-44 flex-shrink-0 group text-left"
           >
             <div className="aspect-video overflow-hidden bg-muted">
@@ -317,43 +350,55 @@ function ThumbMarquee({ songs }: { songs: Song[] }) {
       <div className="pointer-events-none absolute inset-y-0 left-0 w-12 sm:w-20 bg-gradient-to-r from-background to-transparent" />
       <div className="pointer-events-none absolute inset-y-0 right-0 w-12 sm:w-20 bg-gradient-to-l from-background to-transparent" />
 
-      {/* Popup player — click the backdrop (anything outside the video) to close */}
-      {activeSong && (
-        <div
-          className="fixed inset-0 z-[100] flex items-center justify-center p-6"
-          onClick={() => setActiveSong(null)}
-        >
+      {/* Rendered via portal directly under <body> — this is the fix for two bugs:
+          1) an ancestor FadeIn wrapper applies `transform`, which turns it into
+             the containing block for `position: fixed` descendants, so the
+             popup was centering on that box instead of the viewport.
+          2) it now safely stacks above every other section (e.g. the "view all"
+             button), since portal content is appended at the very end of <body>. */}
+      {activeSong &&
+        typeof document !== "undefined" &&
+        createPortal(
           <div
-            className="absolute inset-0 bg-black/80"
-            style={{ animation: "backdropIn 0.25s ease both" }}
-          />
-          <div
-            className="relative w-full max-w-3xl"
-            style={{ animation: "modalIn 0.35s cubic-bezier(0.16,1,0.3,1) both" }}
-            onClick={(e) => e.stopPropagation()}
+            className="fixed inset-0 z-[100] flex items-center justify-center p-6"
+            onClick={closeSong}
           >
-            <button
-              onClick={() => setActiveSong(null)}
-              className="absolute -top-10 right-0 text-white/80 hover:text-white transition-colors"
-              aria-label="閉じる"
+            <div
+              className="absolute inset-0 bg-black/40"
+              style={{
+                animation: `${closing ? "backdropOut" : "backdropIn"} ${TRANSITION_MS}ms ease both`,
+              }}
+            />
+            <div
+              className="relative w-full max-w-3xl"
+              style={{
+                animation: `${closing ? "modalOut" : "modalIn"} ${TRANSITION_MS}ms cubic-bezier(0.16,1,0.3,1) both`,
+              }}
+              onClick={(e) => e.stopPropagation()}
             >
-              <X size={26} />
-            </button>
-            <div className="relative w-full bg-black" style={{ paddingTop: "56.25%" }}>
-              <iframe
-                src={`https://www.youtube.com/embed/${activeSong.youtubeId}?autoplay=1`}
-                title={activeSong.title}
-                className="absolute inset-0 w-full h-full"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              />
+              <button
+                onClick={closeSong}
+                className="absolute -top-10 right-0 text-white/80 hover:text-white transition-colors"
+                aria-label="閉じる"
+              >
+                <X size={26} />
+              </button>
+              <div className="relative w-full bg-black" style={{ paddingTop: "56.25%" }}>
+                <iframe
+                  src={`https://www.youtube.com/embed/${activeSong.youtubeId}?autoplay=1`}
+                  title={activeSong.title}
+                  className="absolute inset-0 w-full h-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              </div>
+              <p className="mt-3 text-center text-sm font-bold text-white">
+                {activeSong.title} - {activeSong.artist}
+              </p>
             </div>
-            <p className="mt-3 text-center text-sm font-bold text-white">
-              {activeSong.title} - {activeSong.artist}
-            </p>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body
+        )}
 
       <style>{`
         @keyframes marqueeScroll {
@@ -364,9 +409,17 @@ function ThumbMarquee({ songs }: { songs: Song[] }) {
           from { opacity: 0; }
           to   { opacity: 1; }
         }
+        @keyframes backdropOut {
+          from { opacity: 1; }
+          to   { opacity: 0; }
+        }
         @keyframes modalIn {
           from { opacity: 0; transform: scale(0.85); }
           to   { opacity: 1; transform: scale(1); }
+        }
+        @keyframes modalOut {
+          from { opacity: 1; transform: scale(1); }
+          to   { opacity: 0; transform: scale(0.85); }
         }
       `}</style>
     </div>
@@ -1016,10 +1069,13 @@ function FloatingContactButton({
 
   const handleClick = () => {
     if (isWorks) {
+      // Land directly on the contact section — no anchor-style smooth scroll,
+      // since animating a scroll right after a page switch reads as two
+      // separate motions. A short delay just waits for Home's DOM to mount.
       navigate("/");
       setTimeout(() => {
-        document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" });
-      }, 80);
+        document.getElementById("contact")?.scrollIntoView({ behavior: "auto" });
+      }, 50);
     } else {
       document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" });
     }
@@ -1028,15 +1084,16 @@ function FloatingContactButton({
   return (
     <button
       onClick={handleClick}
-      className={`fixed bottom-6 right-6 z-40 flex items-center gap-2 bg-[#C41E3A] text-white px-5 py-3.5 text-xs font-bold tracking-widest shadow-[0_4px_20px_rgba(0,0,0,0.25)] hover:bg-[#a5192f] transition-all duration-500 ${
+      className={`fixed bottom-6 right-6 z-40 flex items-center justify-center rounded-full w-14 h-14 md:w-16 md:h-16 bg-[#C41E3A] text-white shadow-[0_4px_20px_rgba(0,0,0,0.25)] hover:bg-[#a5192f] transition-all duration-500 ${
         visible
           ? "opacity-100 translate-y-0 pointer-events-auto"
           : "opacity-0 translate-y-3 pointer-events-none"
       }`}
+      aria-label="お問い合わせ"
       aria-hidden={!visible}
     >
-      <Mail size={14} />
-      お問い合わせ
+      <Mail size={22} className="md:hidden" />
+      <Mail size={26} className="hidden md:block" />
     </button>
   );
 }
@@ -1101,11 +1158,8 @@ function WorksPage() {
     return tag && (ALL_TABS as string[]).includes(tag) ? (tag as TabKey) : "All";
   });
 
-  const tabBarRef = useRef<HTMLDivElement>(null);
-
   const handleTagClick = (tag: Tag) => {
     setActiveTab(tag);
-    tabBarRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   const filtered =
@@ -1125,7 +1179,7 @@ function WorksPage() {
 
         {/* Tab bar */}
         <FadeIn delay={80} className="mb-14">
-          <div ref={tabBarRef} className="flex items-center justify-center flex-wrap gap-2 scroll-mt-24">
+          <div className="flex items-center justify-center flex-wrap gap-2">
             {ALL_TABS.map((tab) => (
               <button
                 key={tab}
