@@ -372,7 +372,7 @@ function Hero() {
         className="absolute inset-0 z-[5] pointer-events-none"
         style={{
           background:
-            "radial-gradient(ellipse 60% 45% at 50% 50%, rgba(255,255,255,0.85) 50%, rgba(255,255,255,0) 60%)",
+            "radial-gradient(ellipse 60% 45% at 50% 50%, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0) 60%)",
         }}
       />
 
