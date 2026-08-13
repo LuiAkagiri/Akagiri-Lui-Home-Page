@@ -292,7 +292,11 @@ function HeroBackground() {
     img.onload = () => {
       fitCover();
       try {
-        ($(el) as any).ripples({ resolution: 384 });
+        ($(el) as any).ripples({ 
+          resolution: 384,
+          dropRadius: 10,
+          perturbance: 0.04,
+        });
         ripplesInitialized = true;
       } catch (err) {
         console.error("jquery.ripples failed to initialize:", err);
@@ -348,7 +352,7 @@ function HeroBackground() {
       <style>{`
         @keyframes heroBgFadeIn {
           from { opacity: 0; }
-          to   { opacity: 0.25; }
+          to   { opacity: 0.35; }
         }
       `}</style>
     </div>
@@ -368,7 +372,7 @@ function Hero() {
         className="absolute inset-0 z-[5] pointer-events-none"
         style={{
           background:
-            "radial-gradient(ellipse 60% 45% at 50% 50%, rgba(255,255,255,0.85) 50%, rgba(255,255,255,0) 80%)",
+            "radial-gradient(ellipse 60% 45% at 50% 50%, rgba(255,255,255,0.85) 50%, rgba(255,255,255,0) 60%)",
         }}
       />
 
