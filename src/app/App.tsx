@@ -219,7 +219,13 @@ function SectionLabel({ children }: { children: string }) {
 
 // ─── SongCard ────────────────────────────────────────────────────────────────
 
-function SongCard({ song }: { song: Song }) {
+function SongCard({
+  song,
+  onTagClick,
+}: {
+  song: Song;
+  onTagClick?: (tag: Tag) => void;
+}) {
   return (
     <article className="flex flex-col bg-card border border-border overflow-hidden group transition-shadow hover:shadow-[0_4px_24px_rgba(0,0,0,0.08)]">
       {/* 16:9 YouTube embed */}
@@ -242,12 +248,13 @@ function SongCard({ song }: { song: Song }) {
         </p>
         <div className="flex flex-wrap gap-1.5 mt-1">
           {song.tags.map((tag) => (
-            <span
+            <button
               key={tag}
-              className="text-[10px] font-medium bg-secondary text-muted-foreground px-2 py-0.5 tracking-wide"
+              onClick={() => onTagClick?.(tag)}
+              className="text-[10px] font-medium bg-secondary text-muted-foreground px-2 py-0.5 tracking-wide hover:bg-[#C41E3A] hover:text-white transition-colors"
             >
               {tag}
-            </span>
+            </button>
           ))}
         </div>
       </div>
@@ -259,6 +266,22 @@ function SongCard({ song }: { song: Song }) {
 
 function ThumbMarquee({ songs }: { songs: Song[] }) {
   const track = [...songs, ...songs]; // duplicated for a seamless loop
+  const [activeSong, setActiveSong] = useState<Song | null>(null);
+
+  // Lock background scroll and allow Escape to close while the popup is open.
+  useEffect(() => {
+    if (!activeSong) return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setActiveSong(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [activeSong]);
 
   return (
     <div className="relative overflow-hidden">
@@ -267,12 +290,10 @@ function ThumbMarquee({ songs }: { songs: Song[] }) {
         style={{ animation: "marqueeScroll 60s linear infinite" }}
       >
         {track.map((song, i) => (
-          <a
+          <button
             key={`${song.id}-${i}`}
-            href={`https://www.youtube.com/watch?v=${song.youtubeId}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="w-36 sm:w-44 flex-shrink-0 group"
+            onClick={() => setActiveSong(song)}
+            className="w-36 sm:w-44 flex-shrink-0 group text-left"
           >
             <div className="aspect-video overflow-hidden bg-muted">
               <img
@@ -288,7 +309,7 @@ function ThumbMarquee({ songs }: { songs: Song[] }) {
             <p className="text-[10px] font-light text-muted-foreground truncate">
               {song.artist}
             </p>
-          </a>
+          </button>
         ))}
       </div>
 
@@ -296,10 +317,56 @@ function ThumbMarquee({ songs }: { songs: Song[] }) {
       <div className="pointer-events-none absolute inset-y-0 left-0 w-12 sm:w-20 bg-gradient-to-r from-background to-transparent" />
       <div className="pointer-events-none absolute inset-y-0 right-0 w-12 sm:w-20 bg-gradient-to-l from-background to-transparent" />
 
+      {/* Popup player — click the backdrop (anything outside the video) to close */}
+      {activeSong && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center p-6"
+          onClick={() => setActiveSong(null)}
+        >
+          <div
+            className="absolute inset-0 bg-black/80"
+            style={{ animation: "backdropIn 0.25s ease both" }}
+          />
+          <div
+            className="relative w-full max-w-3xl"
+            style={{ animation: "modalIn 0.35s cubic-bezier(0.16,1,0.3,1) both" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setActiveSong(null)}
+              className="absolute -top-10 right-0 text-white/80 hover:text-white transition-colors"
+              aria-label="閉じる"
+            >
+              <X size={26} />
+            </button>
+            <div className="relative w-full bg-black" style={{ paddingTop: "56.25%" }}>
+              <iframe
+                src={`https://www.youtube.com/embed/${activeSong.youtubeId}?autoplay=1`}
+                title={activeSong.title}
+                className="absolute inset-0 w-full h-full"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            </div>
+            <p className="mt-3 text-center text-sm font-bold text-white">
+              {activeSong.title} - {activeSong.artist}
+            </p>
+          </div>
+        </div>
+      )}
+
       <style>{`
         @keyframes marqueeScroll {
           from { transform: translateX(0); }
           to   { transform: translateX(-50%); }
+        }
+        @keyframes backdropIn {
+          from { opacity: 0; }
+          to   { opacity: 1; }
+        }
+        @keyframes modalIn {
+          from { opacity: 0; transform: scale(0.85); }
+          to   { opacity: 1; transform: scale(1); }
         }
       `}</style>
     </div>
@@ -539,7 +606,10 @@ function HeroBackground() {
 
 function Hero() {
   return (
-    <section className="relative min-h-screen flex flex-col items-center justify-center px-6 pt-24 pb-16 text-center overflow-hidden">
+    <section
+      id="hero"
+      className="relative min-h-screen flex flex-col items-center justify-center px-6 pt-24 pb-16 text-center overflow-hidden"
+    >
       {/* Thin red line accent */}
       <div className="absolute top-0 left-0 w-full h-0.5 bg-[#C41E3A] opacity-60 z-10" />
 
@@ -726,7 +796,10 @@ function MusicSection({ navigate }: { navigate: (p: string) => void }) {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-14">
           {featured.map((song, i) => (
             <FadeIn key={song.id} delay={i * 100}>
-              <SongCard song={song} />
+              <SongCard
+                song={song}
+                onTagClick={(tag) => navigate(`/works?tag=${encodeURIComponent(tag)}`)}
+              />
             </FadeIn>
           ))}
         </div>
@@ -890,6 +963,86 @@ function Contact() {
 
 // ─── Footer ──────────────────────────────────────────────────────────────────
 
+// ─── Floating Contact Button ───────────────────────────────────────────────────
+
+function FloatingContactButton({
+  isWorks,
+  navigate,
+}: {
+  isWorks: boolean;
+  navigate: (p: string) => void;
+}) {
+  // On Works, always shown. On Home, hidden in the hero, fades in once scrolled
+  // past it, and fades out again while the contact section itself is in view.
+  const [visible, setVisible] = useState(isWorks);
+
+  useEffect(() => {
+    if (isWorks) {
+      setVisible(true);
+      return;
+    }
+
+    const heroEl = document.getElementById("hero");
+    const contactEl = document.getElementById("contact");
+    if (!heroEl || !contactEl) return;
+
+    let pastHero = false;
+    let inContact = false;
+    const update = () => setVisible(pastHero && !inContact);
+
+    const heroObserver = new IntersectionObserver(
+      ([entry]) => {
+        pastHero = !entry.isIntersecting;
+        update();
+      },
+      { threshold: 0 }
+    );
+    const contactObserver = new IntersectionObserver(
+      ([entry]) => {
+        inContact = entry.isIntersecting;
+        update();
+      },
+      { threshold: 0.15 }
+    );
+
+    heroObserver.observe(heroEl);
+    contactObserver.observe(contactEl);
+
+    return () => {
+      heroObserver.disconnect();
+      contactObserver.disconnect();
+    };
+  }, [isWorks]);
+
+  const handleClick = () => {
+    if (isWorks) {
+      navigate("/");
+      setTimeout(() => {
+        document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" });
+      }, 80);
+    } else {
+      document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
+  return (
+    <button
+      onClick={handleClick}
+      className={`fixed bottom-6 right-6 z-40 flex items-center gap-2 bg-[#C41E3A] text-white px-5 py-3.5 text-xs font-bold tracking-widest shadow-[0_4px_20px_rgba(0,0,0,0.25)] hover:bg-[#a5192f] transition-all duration-500 ${
+        visible
+          ? "opacity-100 translate-y-0 pointer-events-auto"
+          : "opacity-0 translate-y-3 pointer-events-none"
+      }`}
+      aria-hidden={!visible}
+    >
+      <Mail size={14} />
+      お問い合わせ
+    </button>
+  );
+}
+
+// ─── Footer ──────────────────────────────────────────────────────────────────
+
 function Footer({ navigate }: { navigate: (p: string) => void }) {
   return (
     <footer className="border-t border-border py-10 px-6">
@@ -942,7 +1095,18 @@ function HomePage({ navigate }: { navigate: (p: string) => void }) {
 // ─── Works Page ───────────────────────────────────────────────────────────────
 
 function WorksPage() {
-  const [activeTab, setActiveTab] = useState<TabKey>("All");
+  const [activeTab, setActiveTab] = useState<TabKey>(() => {
+    if (typeof window === "undefined") return "All";
+    const tag = new URLSearchParams(window.location.search).get("tag");
+    return tag && (ALL_TABS as string[]).includes(tag) ? (tag as TabKey) : "All";
+  });
+
+  const tabBarRef = useRef<HTMLDivElement>(null);
+
+  const handleTagClick = (tag: Tag) => {
+    setActiveTab(tag);
+    tabBarRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
   const filtered =
     activeTab === "All"
@@ -961,7 +1125,7 @@ function WorksPage() {
 
         {/* Tab bar */}
         <FadeIn delay={80} className="mb-14">
-          <div className="flex items-center justify-center flex-wrap gap-2">
+          <div ref={tabBarRef} className="flex items-center justify-center flex-wrap gap-2 scroll-mt-24">
             {ALL_TABS.map((tab) => (
               <button
                 key={tab}
@@ -983,7 +1147,7 @@ function WorksPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {filtered.map((song, i) => (
               <FadeIn key={`${activeTab}-${song.id}`} delay={i * 70}>
-                <SongCard song={song} />
+                <SongCard song={song} onTagClick={handleTagClick} />
               </FadeIn>
             ))}
           </div>
@@ -1017,7 +1181,7 @@ export default function App() {
     return () => window.removeEventListener("popstate", onPop);
   }, []);
 
-  const isWorks = currentPage === "/works";
+  const isWorks = currentPage.startsWith("/works");
 
   return (
     <div
@@ -1035,6 +1199,7 @@ export default function App() {
       )}
 
       <Footer navigate={navigate} />
+      <FloatingContactButton isWorks={isWorks} navigate={navigate} />
     </div>
   );
 }
