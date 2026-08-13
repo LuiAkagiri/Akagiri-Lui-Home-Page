@@ -233,12 +233,12 @@ function SongCard({ song }: { song: Song }) {
           loading="lazy"
         />
       </div>
-      <div className="p-5 flex flex-col gap-2 flex-1">
-        <h3 className="text-base font-bold text-foreground leading-snug">
+      <div className="p-4 flex flex-col gap-2 flex-1">
+        <h3 className="text-[15px] font-bold text-foreground leading-snug whitespace-nowrap overflow-hidden text-ellipsis">
           {song.title} - {song.artist}
         </h3>
         <p className="text-xs font-medium text-[#C41E3A] tracking-wide">
-          {song.role}
+          担当：{song.role.split("/").join(" / ")}
         </p>
         <div className="flex flex-wrap gap-1.5 mt-1">
           {song.tags.map((tag) => (
@@ -264,7 +264,7 @@ function ThumbMarquee({ songs }: { songs: Song[] }) {
     <div className="relative overflow-hidden">
       <div
         className="flex gap-4 w-max"
-        style={{ animation: "marqueeScroll 45s linear infinite" }}
+        style={{ animation: "marqueeScroll 60s linear infinite" }}
       >
         {track.map((song, i) => (
           <a
@@ -714,8 +714,8 @@ function MusicSection({ navigate }: { navigate: (p: string) => void }) {
   const featured = SONGS.filter((s) => s.featured);
 
   return (
-    <section className="py-32 px-6 border-t border-border">
-      <div className="max-w-5xl mx-auto">
+    <section className="py-32 border-t border-border">
+      <div className="max-w-6xl mx-auto px-6">
         <FadeIn className="text-center mb-16">
           <SectionLabel>Works</SectionLabel>
           <h2 className="text-3xl md:text-4xl font-black text-foreground tracking-tight">
@@ -730,11 +730,15 @@ function MusicSection({ navigate }: { navigate: (p: string) => void }) {
             </FadeIn>
           ))}
         </div>
+      </div>
 
-        <FadeIn delay={150} className="mb-14">
-          <ThumbMarquee songs={SONGS} />
-        </FadeIn>
+      {/* Full-bleed — the marquee deliberately breaks out of the centered column
+          so the flow of thumbnails feels continuous, not boxed in. */}
+      <FadeIn delay={150} className="mb-14">
+        <ThumbMarquee songs={SONGS} />
+      </FadeIn>
 
+      <div className="max-w-6xl mx-auto px-6">
         <FadeIn className="flex justify-center">
           <button
             onClick={() => navigate("/works")}
