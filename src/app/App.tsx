@@ -288,24 +288,15 @@ function ThumbMarquee({ songs }: { songs: Song[] }) {
     }, TRANSITION_MS);
   };
 
-  // Lock background scroll while the popup is open, but compensate for the
-  // scrollbar disappearing (which otherwise shifts the whole page sideways).
+  // Background stays scrollable while the popup is open (fixed positioning
+  // keeps the popup pinned center-screen regardless). Just handle Escape.
   useEffect(() => {
     if (!activeSong) return;
-    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
-    const prevOverflow = document.body.style.overflow;
-    const prevPaddingRight = document.body.style.paddingRight;
-    document.body.style.overflow = "hidden";
-    if (scrollbarWidth > 0) {
-      document.body.style.paddingRight = `${scrollbarWidth}px`;
-    }
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") closeSong();
     };
     window.addEventListener("keydown", onKey);
     return () => {
-      document.body.style.overflow = prevOverflow;
-      document.body.style.paddingRight = prevPaddingRight;
       window.removeEventListener("keydown", onKey);
     };
   }, [activeSong]);
@@ -661,7 +652,7 @@ function Hero() {
   return (
     <section
       id="hero"
-      className="relative min-h-screen flex flex-col items-center justify-center px-6 pt-24 pb-16 text-center overflow-hidden"
+      className="relative min-h-[82vh] flex flex-col items-center justify-center px-6 pt-20 pb-14 text-center overflow-hidden"
     >
       {/* Thin red line accent */}
       <div className="absolute top-0 left-0 w-full h-0.5 bg-[#C41E3A] opacity-60 z-10" />
@@ -720,7 +711,12 @@ function Hero() {
         style={{ animation: "scrollBounce 2s ease-in-out infinite" }}
         aria-label="Scroll down"
       >
-        <span className="text-[9px] tracking-[0.3em] font-bold">SCROLL</span>
+        <span
+          className="text-[9px] font-bold"
+          style={{ letterSpacing: "0.3em", marginRight: "-0.3em" }}
+        >
+          SCROLL
+        </span>
         <ChevronDown size={16} />
       </button>
 
@@ -1084,16 +1080,18 @@ function FloatingContactButton({
   return (
     <button
       onClick={handleClick}
-      className={`fixed bottom-6 right-6 z-40 flex items-center justify-center rounded-full w-14 h-14 md:w-16 md:h-16 bg-[#C41E3A] text-white shadow-[0_4px_20px_rgba(0,0,0,0.25)] hover:bg-[#a5192f] transition-all duration-500 ${
+      className={`fixed bottom-6 right-6 z-40 flex items-center gap-2.5 rounded-full bg-[#C41E3A] text-white shadow-[0_4px_20px_rgba(0,0,0,0.25)] hover:bg-[#a5192f] transition-all duration-500 px-6 py-4 md:px-8 md:py-5 ${
         visible
           ? "opacity-100 translate-y-0 pointer-events-auto"
           : "opacity-0 translate-y-3 pointer-events-none"
       }`}
-      aria-label="お問い合わせ"
       aria-hidden={!visible}
     >
-      <Mail size={22} className="md:hidden" />
-      <Mail size={26} className="hidden md:block" />
+      <Mail size={20} className="md:hidden flex-shrink-0" />
+      <Mail size={24} className="hidden md:block flex-shrink-0" />
+      <span className="text-sm md:text-base font-bold tracking-wide whitespace-nowrap">
+        お問い合わせ
+      </span>
     </button>
   );
 }
