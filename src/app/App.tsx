@@ -269,11 +269,11 @@ function HeroBackground() {
 
     // How long the mouse must sit still before the ripples are force-calmed.
     // Raise this for a longer "lingering" effect, lower it to settle sooner.
-    const IDLE_MS = 600;
+    const IDLE_MS = 2000;
 
     const rippleOptions = { 
       resolution: 384,
-      dropRadius: 30,
+      dropRadius: 20,
       perturbance: 0.02,
     };
 
