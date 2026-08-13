@@ -256,31 +256,66 @@ function HeroBackground() {
     return 8 + frac * 84; // height % between 8 and 92
   });
 
+  const containerRef = useRef<HTMLDivElement>(null);
   const waterRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const container = containerRef.current;
     const el = waterRef.current;
-    if (!el) return;
+    if (!container || !el) return;
 
-    // Matches the plugin's standard usage: element has a CSS background-image,
-    // then $(el).ripples() is called with no extra options (mouse-interactive by default).
-    try {
-      ($(el) as any).ripples();
-    } catch (err) {
-      console.error("jquery.ripples failed to initialize:", err);
-    }
+    let ripplesInitialized = false;
+
+    // Manually compute a "cover" fit in JS (width/height in real px) instead of
+    // relying on CSS `background-size: cover`, which this plugin doesn't handle
+    // correctly on very wide/short elements — it was tiling a low-res simulation
+    // texture instead of scaling the image, causing the striped/stretched look.
+    const fitCover = () => {
+      const cw = container.clientWidth;
+      const ch = container.clientHeight;
+      const iw = img.naturalWidth;
+      const ih = img.naturalHeight;
+      if (!iw || !ih || !cw || !ch) return;
+      const scale = Math.max(cw / iw, ch / ih);
+      el.style.width = `${Math.ceil(iw * scale)}px`;
+      el.style.height = `${Math.ceil(ih * scale)}px`;
+      if (ripplesInitialized) {
+        try {
+          ($(el) as any).ripples("updateSize");
+        } catch {
+          // ignore
+        }
+      }
+    };
+
+    const img = new Image();
+    img.onload = () => {
+      fitCover();
+      try {
+        ($(el) as any).ripples({ resolution: 384 });
+        ripplesInitialized = true;
+      } catch (err) {
+        console.error("jquery.ripples failed to initialize:", err);
+      }
+    };
+    img.src = avatarSrc;
+
+    window.addEventListener("resize", fitCover);
 
     return () => {
-      try {
-        ($(el) as any).ripples("destroy");
-      } catch {
-        // never initialized, or already unmounted
+      window.removeEventListener("resize", fitCover);
+      if (ripplesInitialized) {
+        try {
+          ($(el) as any).ripples("destroy");
+        } catch {
+          // already unmounted
+        }
       }
     };
   }, []);
 
   return (
-    <div className="absolute inset-0 overflow-hidden">
+    <div ref={containerRef} className="absolute inset-0 overflow-hidden">
       {/* Waveform strip — purely decorative, never intercepts the mouse */}
       <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 flex items-center justify-center gap-[3px] opacity-[0.07] pointer-events-none z-10">
         {bars.map((h, i) => (
@@ -293,15 +328,18 @@ function HeroBackground() {
       </div>
 
       {/* Real water-ripple effect (jQuery Ripples / WebGL), mouse-interactive.
+          Sized in JS to exactly cover the container (see fitCover above), then
+          stretched 1:1 via background-size so the plugin never has to crop/tile it.
           Fades in starting slightly before the text block. */}
       <div
         ref={waterRef}
-        className="absolute inset-0"
+        className="absolute top-1/2 left-1/2"
         style={{
+          transform: "translate(-50%, -50%)",
           backgroundImage: `url(${avatarSrc})`,
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
-          backgroundSize: "cover",
+          backgroundSize: "100% 100%",
           filter: "blur(20px)",
           animation: "heroBgFadeIn 1s cubic-bezier(0.22,1,0.36,1) both",
         }}
