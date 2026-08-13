@@ -19,47 +19,139 @@ import "jquery.ripples";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
+type Tag =
+  | "VTuber"
+  | "アイドル"
+  | "かっこいい系"
+  | "可愛い系"
+  | "バラード系"
+  | "バンド系"
+  | "エレクトロ系";
+
+type TabKey = "All" | Tag;
+
+const ALL_TABS: TabKey[] = [
+  "All",
+  "VTuber",
+  "アイドル",
+  "かっこいい系",
+  "可愛い系",
+  "バラード系",
+  "バンド系",
+  "エレクトロ系",
+];
+
 interface Song {
   id: string;
   title: string;
-  client: string;
-  genre: string;
-  genreFilters: GenreTab[];
+  artist: string;
+  role: string;
+  tags: Tag[];
   youtubeId: string;
-  badge?: string;
+  featured?: boolean;
 }
-
-type GenreTab = "All" | "J-POP" | "ロック" | "VTuber" | "アイドル";
-const ALL_TABS: GenreTab[] = ["All", "J-POP", "ロック", "VTuber", "アイドル"];
 
 // ─── Data ────────────────────────────────────────────────────────────────────
 
 const SONGS: Song[] = [
   {
     id: "1",
-    title: "かまちょ注意報!",
-    client: "自身名義 (feat.椎乃実夏)",
-    genre: "VTuber",
-    genreFilters: ["VTuber", "J-POP"],
+    title: "かまちょ注意報！",
+    artist: "赤桐ルイ feat. 椎乃実なつ",
+    role: "作詞/作曲/編曲/ミックス",
+    tags: ["VTuber", "可愛い系"],
     youtubeId: "9VmBqG2qOiY",
-    badge: "UGC 3,600件突破・累計120万再生",
+    featured: true,
   },
   {
     id: "2",
     title: "僕ら色の銀河",
-    client: "友絆リュリュ",
-    genre: "VTuber",
-    genreFilters: ["VTuber"],
+    artist: "友絆リュリュ",
+    role: "作詞/作曲/編曲/ミックス",
+    tags: ["VTuber", "かっこいい系", "バラード系", "バンド系"],
     youtubeId: "I5MdhNn3AcQ",
-    badge: "再生回数5万回突破",
+    featured: true,
   },
   {
     id: "3",
+    title: "名も無きお星様",
+    artist: "蓬莱エマ",
+    role: "作詞/作曲/編曲/ミックス",
+    tags: ["VTuber", "バラード系", "バンド系"],
+    youtubeId: "V1wET_baDOs",
+  },
+  {
+    id: "4",
+    title: "さくらいろうさぎ -5th Anniversary Ver.",
+    artist: "卯丸とあ",
+    role: "編曲/ミックス",
+    tags: ["VTuber", "可愛い系", "エレクトロ系"],
+    youtubeId: "ADn1DadWFGc",
+  },
+  {
+    id: "5",
+    title: "閃光フィラメント",
+    artist: "なのぷー",
+    role: "作詞/作曲/編曲/ミックス",
+    tags: ["VTuber", "エレクトロ系"],
+    youtubeId: "iWx4SjTM8Hc",
+  },
+  {
+    id: "6",
+    title: "絶賛！使い魔ちゅー☆",
+    artist: "堕猫ぽよ",
+    role: "作詞/作曲/編曲/ミックス",
+    tags: ["VTuber", "エレクトロ系"],
+    youtubeId: "rimbgx4Vr8E",
+  },
+  {
+    id: "7",
+    title: "星推し☆",
+    artist: "天満スピカ",
+    role: "作詞/作曲/編曲/ミックス",
+    tags: ["VTuber", "可愛い系", "バンド系"],
+    youtubeId: "kQmS_NuL49g",
+  },
+  {
+    id: "8",
+    title: "INterACT",
+    artist: "ぴるびん",
+    role: "作詞/作曲/編曲/ミックス",
+    tags: ["VTuber", "かっこいい系", "バンド系"],
+    youtubeId: "iBbnmTa9_jw",
+  },
+  {
+    id: "9",
+    title: "あの日の向日葵",
+    artist: "陽葵ぜろ",
+    role: "作詞/作曲/編曲/ミックス",
+    tags: ["VTuber", "バラード系", "バンド系"],
+    youtubeId: "_WkUS-f-7Hg",
+  },
+  {
+    id: "10",
+    title: "Little Brave Story",
+    artist: "このアイドルはフィクションです。",
+    role: "編曲",
+    tags: ["アイドル"],
+    youtubeId: "ksJ0IlLsYWo",
+  },
+  {
+    id: "11",
+    title: "君に夢中でパンクChu！",
+    artist: "海月おとは",
+    role: "作詞/作曲/編曲/ミックス",
+    tags: ["アイドル", "可愛い系", "エレクトロ系"],
+    youtubeId: "-MYEERtBtxs",
+  },
+  {
+    id: "12",
     title: "君がいるだけでフルコンボ",
-    client: "南花音",
-    genre: "アイドル",
-    genreFilters: ["アイドル", "J-POP"],
+    artist: "南花音",
+    role: "作詞/作曲/編曲/ミックス",
+    tags: ["アイドル", "可愛い系", "バンド系"],
     youtubeId: "oTuvE_5jqdw",
+    featured: true,
   },
 ];
 
@@ -141,23 +233,76 @@ function SongCard({ song }: { song: Song }) {
           loading="lazy"
         />
       </div>
-      <div className="p-5 flex flex-col gap-3 flex-1">
-        {song.badge && (
-          <span className="self-start text-[10px] font-bold tracking-wider text-[#C41E3A] border border-[#C41E3A] px-2 py-0.5 leading-tight">
-            {song.badge}
-          </span>
-        )}
-        <div>
-          <h3 className="text-base font-bold text-foreground leading-snug mb-1">
-            {song.title}
-          </h3>
-          <p className="text-xs font-light text-muted-foreground">{song.client}</p>
+      <div className="p-5 flex flex-col gap-2 flex-1">
+        <h3 className="text-base font-bold text-foreground leading-snug">
+          {song.title} - {song.artist}
+        </h3>
+        <p className="text-xs font-medium text-[#C41E3A] tracking-wide">
+          {song.role}
+        </p>
+        <div className="flex flex-wrap gap-1.5 mt-1">
+          {song.tags.map((tag) => (
+            <span
+              key={tag}
+              className="text-[10px] font-medium bg-secondary text-muted-foreground px-2 py-0.5 tracking-wide"
+            >
+              {tag}
+            </span>
+          ))}
         </div>
-        <span className="self-start text-[10px] font-medium bg-secondary text-muted-foreground px-2 py-0.5 tracking-wide">
-          {song.genre}
-        </span>
       </div>
     </article>
+  );
+}
+
+// ─── ThumbMarquee ─────────────────────────────────────────────────────────────
+
+function ThumbMarquee({ songs }: { songs: Song[] }) {
+  const track = [...songs, ...songs]; // duplicated for a seamless loop
+
+  return (
+    <div className="relative overflow-hidden">
+      <div
+        className="flex gap-4 w-max"
+        style={{ animation: "marqueeScroll 45s linear infinite" }}
+      >
+        {track.map((song, i) => (
+          <a
+            key={`${song.id}-${i}`}
+            href={`https://www.youtube.com/watch?v=${song.youtubeId}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-36 sm:w-44 flex-shrink-0 group"
+          >
+            <div className="aspect-video overflow-hidden bg-muted">
+              <img
+                src={`https://img.youtube.com/vi/${song.youtubeId}/hqdefault.jpg`}
+                alt={song.title}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                loading="lazy"
+              />
+            </div>
+            <p className="mt-2 text-[11px] font-medium text-foreground truncate">
+              {song.title}
+            </p>
+            <p className="text-[10px] font-light text-muted-foreground truncate">
+              {song.artist}
+            </p>
+          </a>
+        ))}
+      </div>
+
+      {/* Edge fade masks so thumbnails don't hard-cut at the container edges */}
+      <div className="pointer-events-none absolute inset-y-0 left-0 w-12 sm:w-20 bg-gradient-to-r from-background to-transparent" />
+      <div className="pointer-events-none absolute inset-y-0 right-0 w-12 sm:w-20 bg-gradient-to-l from-background to-transparent" />
+
+      <style>{`
+        @keyframes marqueeScroll {
+          from { transform: translateX(0); }
+          to   { transform: translateX(-50%); }
+        }
+      `}</style>
+    </div>
   );
 }
 
@@ -566,23 +711,29 @@ function AppealPoints() {
 // ─── Music Section ────────────────────────────────────────────────────────────
 
 function MusicSection({ navigate }: { navigate: (p: string) => void }) {
+  const featured = SONGS.filter((s) => s.featured);
+
   return (
     <section className="py-32 px-6 border-t border-border">
       <div className="max-w-5xl mx-auto">
         <FadeIn className="text-center mb-16">
           <SectionLabel>Works</SectionLabel>
           <h2 className="text-3xl md:text-4xl font-black text-foreground tracking-tight">
-            楽曲抜粋
+            制作楽曲のご紹介
           </h2>
         </FadeIn>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-14">
-          {SONGS.map((song, i) => (
+          {featured.map((song, i) => (
             <FadeIn key={song.id} delay={i * 100}>
               <SongCard song={song} />
             </FadeIn>
           ))}
         </div>
+
+        <FadeIn delay={150} className="mb-14">
+          <ThumbMarquee songs={SONGS} />
+        </FadeIn>
 
         <FadeIn className="flex justify-center">
           <button
@@ -787,12 +938,12 @@ function HomePage({ navigate }: { navigate: (p: string) => void }) {
 // ─── Works Page ───────────────────────────────────────────────────────────────
 
 function WorksPage() {
-  const [activeTab, setActiveTab] = useState<GenreTab>("All");
+  const [activeTab, setActiveTab] = useState<TabKey>("All");
 
   const filtered =
     activeTab === "All"
       ? SONGS
-      : SONGS.filter((s) => s.genreFilters.includes(activeTab));
+      : SONGS.filter((s) => s.tags.includes(activeTab));
 
   return (
     <main className="min-h-screen pt-32 pb-32 px-6">
@@ -825,7 +976,7 @@ function WorksPage() {
 
         {/* Grid — 1 col / 2 col / 3-4 col */}
         {filtered.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {filtered.map((song, i) => (
               <FadeIn key={`${activeTab}-${song.id}`} delay={i * 70}>
                 <SongCard song={song} />
