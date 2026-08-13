@@ -265,6 +265,41 @@ function HeroBackground() {
     if (!container || !el) return;
 
     let ripplesInitialized = false;
+    let idleTimer: number | undefined;
+
+    // How long the mouse must sit still before the ripples are force-calmed.
+    // Raise this for a longer "lingering" effect, lower it to settle sooner.
+    const IDLE_MS = 1800;
+
+    const rippleOptions = { resolution: 384 };
+
+    const initRipples = () => {
+      try {
+        ($(el) as any).ripples(rippleOptions);
+        ripplesInitialized = true;
+      } catch (err) {
+        console.error("jquery.ripples failed to initialize:", err);
+      }
+    };
+
+    // The plugin has no built-in "settle faster" option — the wave decay rate is
+    // fixed internally. So instead we detect mouse inactivity and force a reset
+    // (destroy + reinit), which snaps the simulation back to flat/calm.
+    const calmDown = () => {
+      if (!ripplesInitialized) return;
+      try {
+        ($(el) as any).ripples("destroy");
+      } catch {
+        // ignore
+      }
+      ripplesInitialized = false;
+      initRipples();
+    };
+
+    const handleActivity = () => {
+      if (idleTimer) window.clearTimeout(idleTimer);
+      idleTimer = window.setTimeout(calmDown, IDLE_MS);
+    };
 
     // Manually compute a "cover" fit in JS (width/height in real px) instead of
     // relying on CSS `background-size: cover`, which this plugin doesn't handle
@@ -291,23 +326,17 @@ function HeroBackground() {
     const img = new Image();
     img.onload = () => {
       fitCover();
-      try {
-        ($(el) as any).ripples({ 
-          resolution: 384,
-          dropRadius: 20,
-          perturbance: 0.02,
-        });
-        ripplesInitialized = true;
-      } catch (err) {
-        console.error("jquery.ripples failed to initialize:", err);
-      }
+      initRipples();
     };
     img.src = avatarSrc;
 
+    el.addEventListener("mousemove", handleActivity);
     window.addEventListener("resize", fitCover);
 
     return () => {
       window.removeEventListener("resize", fitCover);
+      el.removeEventListener("mousemove", handleActivity);
+      if (idleTimer) window.clearTimeout(idleTimer);
       if (ripplesInitialized) {
         try {
           ($(el) as any).ripples("destroy");
@@ -352,7 +381,7 @@ function HeroBackground() {
       <style>{`
         @keyframes heroBgFadeIn {
           from { opacity: 0; }
-          to   { opacity: 0.35; }
+          to   { opacity: 0.25; }
         }
       `}</style>
     </div>
@@ -372,7 +401,7 @@ function Hero() {
         className="absolute inset-0 z-[5] pointer-events-none"
         style={{
           background:
-            "radial-gradient(ellipse 60% 45% at 50% 50%, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0) 60%)",
+            "radial-gradient(ellipse 60% 45% at 50% 50%, rgba(255,255,255,0.85) 50%, rgba(255,255,255,0) 80%)",
         }}
       />
 
