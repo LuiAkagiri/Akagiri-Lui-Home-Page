@@ -269,7 +269,7 @@ function HeroBackground() {
 
     // How long the mouse must sit still before the ripples are force-calmed.
     // Raise this for a longer "lingering" effect, lower it to settle sooner.
-    const IDLE_MS = 1000;
+    const IDLE_MS = 1400;
 
     const rippleOptions = { 
       resolution: 384,
@@ -385,7 +385,7 @@ function HeroBackground() {
       <style>{`
         @keyframes heroBgFadeIn {
           from { opacity: 0; }
-          to   { opacity: 0.25; }
+          to   { opacity: 0.35; }
         }
       `}</style>
     </div>
@@ -405,7 +405,7 @@ function Hero() {
         className="absolute inset-0 z-[5] pointer-events-none"
         style={{
           background:
-            "radial-gradient(ellipse 60% 45% at 50% 50%, rgba(255,255,255,0.85) 50%, rgba(255,255,255,0) 80%)",
+            "radial-gradient(ellipse 60% 45% at 50% 50%, rgba(255,255,255,0.85) 20%, rgba(255,255,255,0) 60%)",
         }}
       />
 
