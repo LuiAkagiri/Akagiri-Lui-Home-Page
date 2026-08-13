@@ -294,8 +294,8 @@ function HeroBackground() {
       try {
         ($(el) as any).ripples({ 
           resolution: 384,
-          dropRadius: 10,
-          perturbance: 0.04,
+          dropRadius: 20,
+          perturbance: 0.02,
         });
         ripplesInitialized = true;
       } catch (err) {
