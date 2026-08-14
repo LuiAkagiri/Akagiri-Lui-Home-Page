@@ -711,11 +711,10 @@ function Hero() {
         style={{ animation: "scrollBounce 2s ease-in-out infinite" }}
         aria-label="Scroll down"
       >
-        <span
-          className="text-[9px] font-bold"
-          style={{ letterSpacing: "0.3em", marginRight: "-0.3em" }}
-        >
-          SCROLL
+        <span className="flex gap-[0.3em] text-[9px] font-bold">
+          {"SCROLL".split("").map((ch, i) => (
+            <span key={i}>{ch}</span>
+          ))}
         </span>
         <ChevronDown size={16} />
       </button>
@@ -740,7 +739,7 @@ function Profile() {
   return (
     <section id="profile" className="py-32 px-6 border-t border-border">
       <div className="max-w-5xl mx-auto">
-        <FadeIn className="flex flex-col md:flex-row items-center md:items-center gap-12 md:gap-16">
+        <FadeIn className="flex flex-col md:flex-row items-center md:items-center justify-center gap-12 md:gap-16">
           {/* Avatar circle — swap src when image is provided */}
           <div className="flex-shrink-0">
             <div className="w-40 h-40 md:w-52 md:h-52 rounded-full bg-[#b5a090] overflow-hidden flex-shrink-0 ring-1 ring-border">
