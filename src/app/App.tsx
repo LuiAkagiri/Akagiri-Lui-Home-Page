@@ -702,20 +702,18 @@ function Hero() {
         </div>
       </div>
 
-      {/* Scroll arrow */}
+      {/* Scroll arrow — centered via fixed width + auto margins (inset-x-0 + mx-auto),
+          not transform-based positioning, so there's no interaction with the
+          bounce animation's own transform and no letter-spacing edge cases. */}
       <button
         onClick={() =>
           document.getElementById("profile")?.scrollIntoView({ behavior: "smooth" })
         }
-        className="absolute bottom-10 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-1.5 text-muted-foreground hover:text-[#C41E3A] transition-colors"
+        className="absolute bottom-10 inset-x-0 mx-auto z-10 w-24 flex flex-col items-center gap-1.5 text-center text-muted-foreground hover:text-[#C41E3A] transition-colors"
         style={{ animation: "scrollBounce 2s ease-in-out infinite" }}
         aria-label="Scroll down"
       >
-        <span className="flex gap-[0.3em] text-[9px] font-bold">
-          {"SCROLL".split("").map((ch, i) => (
-            <span key={i}>{ch}</span>
-          ))}
-        </span>
+        <span className="text-[9px] font-bold">SCROLL</span>
         <ChevronDown size={16} />
       </button>
 
@@ -725,8 +723,8 @@ function Hero() {
           to   { opacity: 1; transform: translateY(0); }
         }
         @keyframes scrollBounce {
-          0%, 100% { transform: translateX(-50%) translateY(0); }
-          50%       { transform: translateX(-50%) translateY(6px); }
+          0%, 100% { transform: translateY(0); }
+          50%       { transform: translateY(6px); }
         }
       `}</style>
     </section>
@@ -1079,7 +1077,7 @@ function FloatingContactButton({
   return (
     <button
       onClick={handleClick}
-      className={`fixed bottom-6 right-6 z-40 flex items-center gap-2.5 rounded-full bg-[#C41E3A] text-white shadow-[0_4px_20px_rgba(0,0,0,0.25)] hover:bg-[#a5192f] transition-all duration-500 px-6 py-4 md:px-8 md:py-5 ${
+      className={`fixed bottom-6 right-6 z-40 flex items-center gap-2.5 md:gap-4 rounded-full bg-[#C41E3A] text-white shadow-[0_4px_20px_rgba(0,0,0,0.25)] hover:bg-[#a5192f] transition-all duration-500 px-6 py-4 md:px-[48px] md:py-[30px] ${
         visible
           ? "opacity-100 translate-y-0 pointer-events-auto"
           : "opacity-0 translate-y-3 pointer-events-none"
@@ -1087,8 +1085,8 @@ function FloatingContactButton({
       aria-hidden={!visible}
     >
       <Mail size={20} className="md:hidden flex-shrink-0" />
-      <Mail size={24} className="hidden md:block flex-shrink-0" />
-      <span className="text-sm md:text-base font-bold tracking-wide whitespace-nowrap">
+      <Mail size={36} className="hidden md:block flex-shrink-0" />
+      <span className="text-sm md:text-[24px] font-bold tracking-wide whitespace-nowrap">
         お問い合わせ
       </span>
     </button>
