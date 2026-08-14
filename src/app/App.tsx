@@ -882,7 +882,7 @@ function Contact() {
     // TODO: replace action with Formspree endpoint
     const form = e.currentTarget;
     const data = new FormData(form);
-    fetch("https://formspree.io/f/YOUR_FORM_ID", {
+    fetch("https://formspree.io/f/xdendggl", {
       method: "POST",
       body: data,
       headers: { Accept: "application/json" },
