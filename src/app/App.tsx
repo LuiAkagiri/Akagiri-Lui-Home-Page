@@ -652,7 +652,7 @@ function Hero() {
   return (
     <section
       id="hero"
-      className="relative min-h-[82vh] flex flex-col items-center justify-center px-6 pt-20 pb-14 text-center overflow-hidden"
+      className="relative min-h-screen flex flex-col items-center justify-center px-6 pt-24 pb-16 text-center overflow-hidden"
     >
       {/* Thin red line accent */}
       <div className="absolute top-0 left-0 w-full h-0.5 bg-[#C41E3A] opacity-60 z-10" />
