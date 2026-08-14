@@ -633,7 +633,7 @@ function HeroBackground() {
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
           backgroundSize: "100% 100%",
-          filter: "blur(20px)",
+          filter: "blur(40px)",
           animation: "heroBgFadeIn 1s cubic-bezier(0.22,1,0.36,1) both",
         }}
       />
@@ -641,7 +641,7 @@ function HeroBackground() {
       <style>{`
         @keyframes heroBgFadeIn {
           from { opacity: 0; }
-          to   { opacity: 0.35; }
+          to   { opacity: 0.55; }
         }
       `}</style>
     </div>
