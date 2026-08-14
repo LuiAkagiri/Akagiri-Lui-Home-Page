@@ -876,26 +876,44 @@ function MusicSection({ navigate }: { navigate: (p: string) => void }) {
 
 function Contact() {
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // TODO: replace action with Formspree endpoint
     const form = e.currentTarget;
     const data = new FormData(form);
+    setSubmitting(true);
+    setError(null);
+
     fetch("https://formspree.io/f/xdendggl", {
       method: "POST",
       body: data,
       headers: { Accept: "application/json" },
     })
-      .then((r) => {
+      .then(async (r) => {
         if (r.ok) {
           setSubmitted(true);
           form.reset();
+        } else {
+          // Try to surface Formspree's own error message if it sent one
+          let message = `送信に失敗しました(エラーコード: ${r.status})。時間をおいて再度お試しください。`;
+          try {
+            const body = await r.json();
+            if (body?.errors?.length) {
+              message = body.errors.map((er: any) => er.message).join(" / ");
+            }
+          } catch {
+            // response wasn't JSON — keep the generic message
+          }
+          setError(message);
         }
       })
       .catch(() => {
-        // Silently fail for placeholder — user will wire Formspree
-        setSubmitted(true);
+        setError("通信エラーが発生しました。ネット接続を確認のうえ、再度お試しください。");
+      })
+      .finally(() => {
+        setSubmitting(false);
       });
   };
 
@@ -995,10 +1013,17 @@ function Contact() {
 
               <button
                 type="submit"
-                className="w-full bg-[#C41E3A] text-white py-4 text-xs font-bold tracking-[0.2em] hover:bg-[#a5192f] transition-colors mt-1"
+                disabled={submitting}
+                className="w-full bg-[#C41E3A] text-white py-4 text-xs font-bold tracking-[0.2em] hover:bg-[#a5192f] disabled:opacity-60 disabled:cursor-not-allowed transition-colors mt-1"
               >
-                送信する
+                {submitting ? "送信中..." : "送信する"}
               </button>
+
+              {error && (
+                <p className="text-xs font-medium text-[#C41E3A] text-center border border-[#C41E3A] px-4 py-3">
+                  {error}
+                </p>
+              )}
             </form>
           )}
         </FadeIn>
