@@ -633,7 +633,7 @@ function HeroBackground() {
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
           backgroundSize: "100% 100%",
-          filter: "blur(40px)",
+          filter: "blur(20px)",
           animation: "heroBgFadeIn 1s cubic-bezier(0.22,1,0.36,1) both",
         }}
       />
@@ -641,7 +641,7 @@ function HeroBackground() {
       <style>{`
         @keyframes heroBgFadeIn {
           from { opacity: 0; }
-          to   { opacity: 0.75; }
+          to   { opacity: 0.35; }
         }
       `}</style>
     </div>
@@ -886,7 +886,7 @@ function Contact() {
     setSubmitting(true);
     setError(null);
 
-    fetch("https://formspree.io/f/xdendggl", {
+    fetch("https://formspree.io/f/YOUR_FORM_ID", {
       method: "POST",
       body: data,
       headers: { Accept: "application/json" },
@@ -1169,6 +1169,80 @@ function HomePage({ navigate }: { navigate: (p: string) => void }) {
   );
 }
 
+// ─── Highlight Page (hidden, for outreach email links) ─────────────────────────
+
+const HIGHLIGHT_SONG_IDS = ["1", "2", "4", "12", "9", "7"];
+
+function HighlightPage() {
+  // Temporarily override the robots meta tag while this page is mounted,
+  // restoring whatever it was set to on the rest of the site when leaving.
+  useEffect(() => {
+    document.title = "収録楽曲 | 赤桐ルイ";
+    const existing = document.querySelector('meta[name="robots"]');
+    const prevContent = existing?.getAttribute("content") ?? null;
+
+    if (existing) {
+      existing.setAttribute("content", "noindex");
+    } else {
+      const meta = document.createElement("meta");
+      meta.setAttribute("name", "robots");
+      meta.setAttribute("content", "noindex");
+      document.head.appendChild(meta);
+    }
+
+    return () => {
+      document.title = "赤桐ルイ | 作詞家・作曲家・編曲家";
+      if (existing) {
+        if (prevContent !== null) {
+          existing.setAttribute("content", prevContent);
+        } else {
+          existing.removeAttribute("content");
+        }
+      } else {
+        document.querySelector('meta[name="robots"][content="noindex"]')?.remove();
+      }
+    };
+  }, []);
+
+  const songs = HIGHLIGHT_SONG_IDS
+    .map((id) => SONGS.find((s) => s.id === id))
+    .filter((s): s is Song => Boolean(s));
+
+  return (
+    <main className="min-h-screen pt-24 pb-32 px-6">
+      <div className="max-w-5xl mx-auto">
+        {/* Featured video */}
+        <FadeIn className="mb-16">
+          <div className="relative w-full bg-black" style={{ paddingTop: "56.25%" }}>
+            <iframe
+              src="https://www.youtube.com/embed/cHPqaAiqZWQ"
+              title="実績紹介動画"
+              className="absolute inset-0 w-full h-full"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          </div>
+        </FadeIn>
+
+        <FadeIn delay={80} className="text-center mb-10">
+          <SectionLabel>Selected Works</SectionLabel>
+          <h1 className="text-3xl md:text-4xl font-black text-foreground tracking-tight">
+            収録楽曲
+          </h1>
+        </FadeIn>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {songs.map((song, i) => (
+            <FadeIn key={song.id} delay={i * 70}>
+              <SongCard song={song} />
+            </FadeIn>
+          ))}
+        </div>
+      </div>
+    </main>
+  );
+}
+
 // ─── Works Page ───────────────────────────────────────────────────────────────
 
 function WorksPage() {
@@ -1256,6 +1330,7 @@ export default function App() {
   }, []);
 
   const isWorks = currentPage.startsWith("/works");
+  const isHighlight = currentPage.startsWith("/highlight");
 
   return (
     <div
@@ -1264,7 +1339,9 @@ export default function App() {
     >
       <Nav currentPage={currentPage} navigate={navigate} />
 
-      {isWorks ? (
+      {isHighlight ? (
+        <HighlightPage />
+      ) : isWorks ? (
         <WorksPage />
       ) : (
         <main>
