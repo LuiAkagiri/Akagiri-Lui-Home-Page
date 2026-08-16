@@ -1212,7 +1212,14 @@ function HighlightPage() {
     <main className="min-h-screen pt-24 pb-32 px-6">
       <div className="max-w-5xl mx-auto">
         {/* Featured video */}
-        <FadeIn className="mb-16">
+        <FadeIn className="text-center mb-8">
+          <SectionLabel>Highlight Reel</SectionLabel>
+          <h1 className="text-3xl md:text-4xl font-black text-foreground tracking-tight">
+            3分半でわかる、制作楽曲ダイジェスト
+          </h1>
+        </FadeIn>
+
+        <FadeIn delay={60} className="mb-16">
           <div className="relative w-full bg-black" style={{ paddingTop: "56.25%" }}>
             <iframe
               src="https://www.youtube.com/embed/cHPqaAiqZWQ"
