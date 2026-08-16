@@ -1037,18 +1037,19 @@ function Contact() {
 // ─── Floating Contact Button ───────────────────────────────────────────────────
 
 function FloatingContactButton({
-  isWorks,
+  forceVisible,
   navigate,
 }: {
-  isWorks: boolean;
+  forceVisible: boolean;
   navigate: (p: string) => void;
 }) {
-  // On Works, always shown. On Home, hidden in the hero, fades in once scrolled
-  // past it, and fades out again while the contact section itself is in view.
-  const [visible, setVisible] = useState(isWorks);
+  // On Works/Highlight, always shown. On Home, hidden in the hero, fades in
+  // once scrolled past it, and fades out again while the contact section
+  // itself is in view.
+  const [visible, setVisible] = useState(forceVisible);
 
   useEffect(() => {
-    if (isWorks) {
+    if (forceVisible) {
       setVisible(true);
       return;
     }
@@ -1083,10 +1084,10 @@ function FloatingContactButton({
       heroObserver.disconnect();
       contactObserver.disconnect();
     };
-  }, [isWorks]);
+  }, [forceVisible]);
 
   const handleClick = () => {
-    if (isWorks) {
+    if (forceVisible) {
       // Land directly on the contact section — no anchor-style smooth scroll,
       // since animating a scroll right after a page switch reads as two
       // separate motions. A short delay just waits for Home's DOM to mount.
@@ -1357,7 +1358,7 @@ export default function App() {
       )}
 
       <Footer navigate={navigate} />
-      <FloatingContactButton isWorks={isWorks} navigate={navigate} />
+      <FloatingContactButton forceVisible={isWorks || isHighlight} navigate={navigate} />
     </div>
   );
 }
