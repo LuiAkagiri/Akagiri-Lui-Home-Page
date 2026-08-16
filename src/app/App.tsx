@@ -641,7 +641,7 @@ function HeroBackground() {
       <style>{`
         @keyframes heroBgFadeIn {
           from { opacity: 0; }
-          to   { opacity: 0.35; }
+          to   { opacity: 0.75; }
         }
       `}</style>
     </div>
