@@ -232,7 +232,7 @@ function SongCard({
       {/* 16:9 YouTube embed */}
       <div className="relative w-full bg-muted" style={{ paddingTop: "56.25%" }}>
         <iframe
-          src={`https://www.youtube.com/embed/${song.youtubeId}`}
+          src={`https://www.youtube.com/embed/${song.youtubeId}?enablejsapi=1`}
           title={song.title}
           className="absolute inset-0 w-full h-full"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -376,7 +376,7 @@ function ThumbMarquee({ songs }: { songs: Song[] }) {
               </button>
               <div className="relative w-full bg-black" style={{ paddingTop: "56.25%" }}>
                 <iframe
-                  src={`https://www.youtube.com/embed/${activeSong.youtubeId}?autoplay=1`}
+                  src={`https://www.youtube.com/embed/${activeSong.youtubeId}?autoplay=1&enablejsapi=1`}
                   title={activeSong.title}
                   className="absolute inset-0 w-full h-full"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -1087,6 +1087,13 @@ function FloatingContactButton({
   }, [forceVisible]);
 
   const handleClick = () => {
+    // GA4 custom event — lets us see how many people who arrived via the
+    // outreach links (works/highlight) actually intended to make contact.
+    (window as any).gtag?.("event", "contact_button_click", {
+      page_location: window.location.href,
+      page_path: window.location.pathname,
+    });
+
     if (forceVisible) {
       // Land directly on the contact section — no anchor-style smooth scroll,
       // since animating a scroll right after a page switch reads as two
@@ -1223,7 +1230,7 @@ function HighlightPage() {
         <FadeIn delay={60} className="mb-16">
           <div className="relative w-full bg-black" style={{ paddingTop: "56.25%" }}>
             <iframe
-              src="https://www.youtube.com/embed/cHPqaAiqZWQ"
+              src="https://www.youtube.com/embed/cHPqaAiqZWQ?enablejsapi=1"
               title="実績紹介動画"
               className="absolute inset-0 w-full h-full"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
