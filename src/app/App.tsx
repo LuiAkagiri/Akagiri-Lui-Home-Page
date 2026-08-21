@@ -1336,6 +1336,15 @@ export default function App() {
     window.history.pushState({}, "", cleanPath);
     setCurrentPage(cleanPath);
     window.scrollTo({ top: 0, behavior: "instant" });
+
+    // GA4's automatic page_view only fires once, on the very first full page
+    // load. In-app navigations (clicking Nav/Footer links, etc.) don't trigger
+    // a real browser navigation, so without this, GA4 would never see them.
+    (window as any).gtag?.("event", "page_view", {
+      page_location: window.location.href,
+      page_path: cleanPath,
+      page_title: document.title,
+    });
   };
 
   useEffect(() => {
