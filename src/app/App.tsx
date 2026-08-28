@@ -1258,6 +1258,227 @@ function HighlightPage() {
   );
 }
 
+// ─── Landing Pages (hidden, for outreach — LP with hero stats + featured video + full grid) ──
+
+interface FeaturedVideoConfig {
+  youtubeId: string;
+  title: string;
+  subtitle?: string;
+  tags?: Tag[];
+  description: string;
+}
+
+// かまちょ注意報！を主役にしたLP用データ（曲データからそのまま組み立て）
+const LP_FEATURED_WORKS: FeaturedVideoConfig = (() => {
+  const song = SONGS.find((s) => s.id === "1")!;
+  return {
+    youtubeId: song.youtubeId,
+    title: `${song.title} - ${song.artist}`,
+    subtitle: `担当：${song.role.split("/").join(" / ")}`,
+    tags: song.tags,
+    description: "（ここに「かまちょ注意報！」の紹介文を入れます）",
+  };
+})();
+
+// 楽曲制作実績ハイライト（まとめ動画）を主役にしたLP用データ
+const LP_FEATURED_HIGHLIGHT: FeaturedVideoConfig = {
+  youtubeId: "cHPqaAiqZWQ",
+  title: "楽曲制作実績ハイライト",
+  description: "（ここにハイライト動画の紹介文を入れます）",
+};
+
+function LPStatsBanner() {
+  return (
+    <section className="relative bg-[#1a1816] text-white overflow-hidden py-16 sm:py-20 px-6 text-center">
+      {/* Lightweight static texture — intentionally not the WebGL water effect used
+          on the home hero, since this page is opened from cold-outreach email links
+          and needs to load fast on unpredictable connections. */}
+      <div
+        className="absolute inset-0 opacity-[0.09]"
+        style={{
+          backgroundImage: `url(${avatarSrc})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          filter: "blur(5px) grayscale(1)",
+        }}
+      />
+      <div className="absolute top-0 left-0 w-full h-0.5 bg-[#C41E3A]" />
+
+      <FadeIn className="relative z-10 max-w-3xl mx-auto">
+        <div className="inline-flex items-center gap-2 mb-4">
+          <Music2 size={14} className="text-[#C41E3A]" strokeWidth={2} />
+          <span className="text-sm font-bold tracking-[0.15em]">作曲家 - 赤桐ルイ</span>
+        </div>
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-black leading-snug tracking-tight">
+          TikTokでの制作楽曲の使用
+          <em className="not-italic text-[#C41E3A]"> 3,700件 </em>
+          を突破。累計再生回数は
+          <em className="not-italic text-[#C41E3A]"> 120万回 </em>
+          。
+        </h1>
+        <p className="mt-4 text-xs sm:text-sm font-light text-white/70 leading-relaxed">
+          作詞・作曲・編曲・ミックスマスタリングまで一人で手がける作曲家、赤桐ルイの制作実績です。
+        </p>
+      </FadeIn>
+    </section>
+  );
+}
+
+function LPFeaturedVideo({ featured }: { featured: FeaturedVideoConfig }) {
+  return (
+    <section className="py-20 px-6 bg-secondary border-t border-border">
+      <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-14 items-center">
+        <FadeIn>
+          <div className="relative w-full bg-black" style={{ paddingTop: "56.25%" }}>
+            <iframe
+              src={`https://www.youtube.com/embed/${featured.youtubeId}?enablejsapi=1`}
+              title={featured.title}
+              className="absolute inset-0 w-full h-full"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          </div>
+        </FadeIn>
+        <FadeIn delay={100}>
+          <SectionLabel>Featured</SectionLabel>
+          <h2 className="text-2xl md:text-3xl font-black text-foreground tracking-tight mb-3 leading-snug">
+            {featured.title}
+          </h2>
+          {featured.subtitle && (
+            <p className="text-xs font-medium text-[#C41E3A] tracking-wide mb-4">
+              {featured.subtitle}
+            </p>
+          )}
+          <p className="text-sm font-light text-foreground leading-relaxed whitespace-pre-line">
+            {featured.description}
+          </p>
+          {featured.tags && (
+            <div className="flex flex-wrap gap-1.5 mt-5">
+              {featured.tags.map((tag) => (
+                <span
+                  key={tag}
+                  className="text-[10px] font-medium bg-background text-muted-foreground px-2 py-0.5 tracking-wide border border-border"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
+        </FadeIn>
+      </div>
+    </section>
+  );
+}
+
+// Self-contained works grid for the LP pages (separate from WorksPage's own
+// implementation, which has its own URL deep-linking logic tied to /works —
+// duplicating this small piece is safer than reworking already-working code).
+function LPWorksGrid() {
+  const [activeTab, setActiveTab] = useState<TabKey>("All");
+  const handleTagClick = (tag: Tag) => setActiveTab(tag);
+  const filtered =
+    activeTab === "All" ? SONGS : SONGS.filter((s) => s.tags.includes(activeTab));
+
+  return (
+    <section className="py-24 px-6 border-t border-border">
+      <div className="max-w-6xl mx-auto">
+        <FadeIn className="text-center mb-14">
+          <SectionLabel>Discography</SectionLabel>
+          <h2 className="text-3xl md:text-4xl font-black text-foreground tracking-tight">
+            制作実績一覧
+          </h2>
+        </FadeIn>
+
+        <FadeIn delay={80} className="mb-14">
+          <div className="flex items-center justify-center flex-wrap gap-2">
+            {ALL_TABS.map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`px-6 py-2.5 text-xs font-bold tracking-widest border transition-colors ${
+                  activeTab === tab
+                    ? "bg-[#C41E3A] text-white border-[#C41E3A]"
+                    : "bg-background text-muted-foreground border-border hover:border-foreground hover:text-foreground"
+                }`}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
+        </FadeIn>
+
+        {filtered.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filtered.map((song, i) => (
+              <FadeIn key={`${activeTab}-${song.id}`} delay={i * 70}>
+                <SongCard song={song} onTagClick={handleTagClick} />
+              </FadeIn>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-32 text-muted-foreground text-sm font-light">
+            該当する楽曲が見つかりませんでした。
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
+function LandingPage({
+  title,
+  featured,
+}: {
+  title: string;
+  featured: FeaturedVideoConfig;
+}) {
+  // Same hidden-page pattern as HighlightPage: noindex + distinct tab title
+  // only while mounted, restored on unmount.
+  useEffect(() => {
+    document.title = `${title} | 赤桐ルイ`;
+    const existing = document.querySelector('meta[name="robots"]');
+    const prevContent = existing?.getAttribute("content") ?? null;
+
+    if (existing) {
+      existing.setAttribute("content", "noindex");
+    } else {
+      const meta = document.createElement("meta");
+      meta.setAttribute("name", "robots");
+      meta.setAttribute("content", "noindex");
+      document.head.appendChild(meta);
+    }
+
+    return () => {
+      document.title = "赤桐ルイ | 作詞家・作曲家・編曲家";
+      if (existing) {
+        if (prevContent !== null) {
+          existing.setAttribute("content", prevContent);
+        } else {
+          existing.removeAttribute("content");
+        }
+      } else {
+        document.querySelector('meta[name="robots"][content="noindex"]')?.remove();
+      }
+    };
+  }, [title]);
+
+  return (
+    <main className="min-h-screen">
+      <LPStatsBanner />
+      <LPFeaturedVideo featured={featured} />
+      <LPWorksGrid />
+    </main>
+  );
+}
+
+function LPWorksPage() {
+  return <LandingPage title="制作実績" featured={LP_FEATURED_WORKS} />;
+}
+
+function LPHighlightPage() {
+  return <LandingPage title="制作実績ハイライト" featured={LP_FEATURED_HIGHLIGHT} />;
+}
+
 // ─── Works Page ───────────────────────────────────────────────────────────────
 
 function WorksPage() {
@@ -1355,6 +1576,8 @@ export default function App() {
 
   const isWorks = currentPage.startsWith("/works");
   const isHighlight = currentPage.startsWith("/highlight");
+  const isLPWorks = currentPage.startsWith("/lp-works");
+  const isLPHighlight = currentPage.startsWith("/lp-highlight");
 
   return (
     <div
@@ -1363,7 +1586,11 @@ export default function App() {
     >
       <Nav currentPage={currentPage} navigate={navigate} />
 
-      {isHighlight ? (
+      {isLPWorks ? (
+        <LPWorksPage />
+      ) : isLPHighlight ? (
+        <LPHighlightPage />
+      ) : isHighlight ? (
         <HighlightPage />
       ) : isWorks ? (
         <WorksPage />
@@ -1374,7 +1601,10 @@ export default function App() {
       )}
 
       <Footer navigate={navigate} />
-      <FloatingContactButton forceVisible={isWorks || isHighlight} navigate={navigate} />
+      <FloatingContactButton
+        forceVisible={isWorks || isHighlight || isLPWorks || isLPHighlight}
+        navigate={navigate}
+      />
     </div>
   );
 }
