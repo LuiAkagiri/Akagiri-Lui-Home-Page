@@ -685,7 +685,7 @@ function Hero() {
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-black leading-[1.2] tracking-tight text-foreground mt-2">
             TikTokでの制作楽曲の使用
             <br />
-            <em className="not-italic text-[#C41E3A]">3,700件</em>を突破。
+            <em className="not-italic text-[#C41E3A]">3,800件</em>を突破。
           </h1>
 
           <p className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight text-foreground mt-3">
@@ -759,7 +759,7 @@ function Profile() {
               作詞家 / 作曲家 / 編曲家
             </p>
             <p className="text-sm font-light text-foreground leading-[2] text-left">
-              自身名義の初リリース曲は、TikTokでのUGC使用3,700件を突破。UGC累計再生回数は120万回を記録。5歳よりピアノを学び、10代で作曲をはじめ、作詞・作曲・編曲・ミックスマスタリングまで、楽曲制作のすべての工程を一人で手がける。J-POP、バンドサウンドを軸に、エレクトロ、バラードまでジャンルを問わず制作。VTuber、アイドルシーンを中心に楽曲を提供している。
+              自身名義の初リリース曲は、TikTokでのUGC使用3,800件を突破。UGC累計再生回数は120万回を記録。5歳よりピアノを学び、10代で作曲をはじめ、作詞・作曲・編曲・ミックスマスタリングまで、楽曲制作のすべての工程を一人で手がける。J-POP、バンドサウンドを軸に、エレクトロ、バラードまでジャンルを問わず制作。VTuber、アイドルシーンを中心に楽曲を提供している。
             </p>
           </div>
         </FadeIn>
@@ -1276,15 +1276,15 @@ const LP_FEATURED_WORKS: FeaturedVideoConfig = (() => {
     title: `${song.title} - ${song.artist}`,
     subtitle: `担当：${song.role.split("/").join(" / ")}`,
     tags: song.tags,
-    description: "（ここに「かまちょ注意報！」の紹介文を入れます）",
+    description: "赤桐ルイ名義としての初リリース楽曲でありながら、TikTokでのUGC投稿数3,800件超え、累計再生回数120万回を突破。デビュー作にしてこの拡散力が、楽曲そのものの強さを物語っています。",
   };
 })();
 
 // 楽曲制作実績ハイライト（まとめ動画）を主役にしたLP用データ
 const LP_FEATURED_HIGHLIGHT: FeaturedVideoConfig = {
   youtubeId: "cHPqaAiqZWQ",
-  title: "楽曲制作実績ハイライト",
-  description: "（ここにハイライト動画の紹介文を入れます）",
+  title: "3分半で楽曲制作実績を一部ご紹介",
+  description: "王道の可愛い系ソングから、エモーショナルなバラード、疾走感のあるバンドサウンドまで。特定のジャンルに偏らない幅広い制作力で、アーティストごとの個性に寄り添った楽曲を届けています。",
 };
 
 function LPStatsBanner() {
@@ -1311,7 +1311,7 @@ function LPStatsBanner() {
         </div>
         <h1 className="text-2xl sm:text-3xl md:text-4xl font-black leading-snug tracking-tight">
           TikTokでの制作楽曲の使用
-          <em className="not-italic text-[#C41E3A]"> 3,700件 </em>
+          <em className="not-italic text-[#C41E3A]"> 3,800件 </em>
           を突破。累計再生回数は
           <em className="not-italic text-[#C41E3A]"> 120万回 </em>
           。
@@ -1464,7 +1464,12 @@ function LandingPage({
 
   return (
     <main className="min-h-screen">
+      {/* Gap above the banner — taller than the fixed nav (64px) so a sliver of
+          background peeks through beneath it, reading as a deliberate seam
+          rather than the nav simply overlapping the dark section. */}
+      <div className="h-20 sm:h-24 bg-background" />
       <LPStatsBanner />
+      <div className="h-16 sm:h-20 bg-background" />
       <LPFeaturedVideo featured={featured} />
       <LPWorksGrid />
     </main>
