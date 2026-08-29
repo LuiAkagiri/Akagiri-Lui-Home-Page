@@ -1287,6 +1287,54 @@ const LP_FEATURED_HIGHLIGHT: FeaturedVideoConfig = {
   description: "王道の可愛い系ソングから、エモーショナルなバラード、疾走感のあるバンドサウンドまで。特定のジャンルに偏らない幅広い制作力で、アーティストごとの個性に寄り添った楽曲を届けています。",
 };
 
+// Small, non-interactive thumbnail marquee used to fill the gap bands above/below
+// the LP stats banner. Deliberately muted (grayscale + reduced opacity) so it
+// reads as ambient texture rather than competing with the bold red stat numbers.
+function MiniThumbMarquee({
+  reverse = false,
+  align = "center",
+}: {
+  reverse?: boolean;
+  align?: "start" | "center" | "end";
+}) {
+  const track = [...SONGS, ...SONGS];
+  const alignClass =
+    align === "end" ? "items-end" : align === "start" ? "items-start" : "items-center";
+
+  return (
+    <div className={`h-full w-full overflow-hidden flex ${alignClass} pointer-events-none`}>
+      <div
+        className="flex gap-3 w-max pb-1"
+        style={{
+          animation: "miniMarqueeScroll 70s linear infinite",
+          animationDirection: reverse ? "reverse" : "normal",
+        }}
+      >
+        {track.map((song, i) => (
+          <div
+            key={`${song.id}-${i}`}
+            className="w-16 sm:w-20 flex-shrink-0 aspect-video overflow-hidden grayscale opacity-40"
+          >
+            <img
+              src={`https://img.youtube.com/vi/${song.youtubeId}/hqdefault.jpg`}
+              alt=""
+              className="w-full h-full object-cover"
+              loading="lazy"
+            />
+          </div>
+        ))}
+      </div>
+
+      <style>{`
+        @keyframes miniMarqueeScroll {
+          from { transform: translateX(0); }
+          to   { transform: translateX(-50%); }
+        }
+      `}</style>
+    </div>
+  );
+}
+
 function LPStatsBanner() {
   return (
     <section className="relative bg-[#1a1816] text-white overflow-hidden py-16 sm:py-20 px-6 text-center">
@@ -1476,9 +1524,13 @@ function LandingPage({
       {/* Gap above the banner — taller than the fixed nav (64px) so a sliver of
           background peeks through beneath it, reading as a deliberate seam
           rather than the nav simply overlapping the dark section. */}
-      <div className="h-32 sm:h-36 bg-background" />
+      <div className="h-32 sm:h-36 bg-background">
+        <MiniThumbMarquee align="end" />
+      </div>
       <LPStatsBanner />
-      <div className="h-16 sm:h-20 bg-background" />
+      <div className="h-16 sm:h-20 bg-background">
+        <MiniThumbMarquee reverse align="start" />
+      </div>
       <LPFeaturedVideo featured={featured} />
       <LPWorksGrid />
     </main>
