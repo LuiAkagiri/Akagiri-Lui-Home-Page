@@ -1038,9 +1038,11 @@ function Contact() {
 
 function FloatingContactButton({
   forceVisible,
+  contactOnSamePage,
   navigate,
 }: {
   forceVisible: boolean;
+  contactOnSamePage?: boolean;
   navigate: (p: string) => void;
 }) {
   // On Works/Highlight, always shown. On Home, hidden in the hero, fades in
@@ -1094,10 +1096,17 @@ function FloatingContactButton({
       page_path: window.location.pathname,
     });
 
+    // Pages that carry their own #contact section (Home, and now the LP
+    // pages) just scroll there directly. Pages without one (Works/Highlight)
+    // need to navigate to Home first, then jump — instantly, not smoothly,
+    // since animating a scroll right after a page switch reads as two
+    // separate motions.
+    if (contactOnSamePage) {
+      document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" });
+      return;
+    }
+
     if (forceVisible) {
-      // Land directly on the contact section — no anchor-style smooth scroll,
-      // since animating a scroll right after a page switch reads as two
-      // separate motions. A short delay just waits for Home's DOM to mount.
       navigate("/");
       setTimeout(() => {
         document.getElementById("contact")?.scrollIntoView({ behavior: "auto" });
@@ -1287,89 +1296,54 @@ const LP_FEATURED_HIGHLIGHT: FeaturedVideoConfig = {
   description: "王道の可愛い系ソングから、エモーショナルなバラード、疾走感のあるバンドサウンドまで。特定のジャンルに偏らない幅広い制作力で、アーティストごとの個性に寄り添った楽曲を届けています。",
 };
 
-// Small, non-interactive thumbnail marquee used to fill the gap bands above/below
-// the LP stats banner. Deliberately muted (grayscale + reduced opacity) so it
-// reads as ambient texture rather than competing with the bold red stat numbers.
-function MiniThumbMarquee({
-  reverse = false,
-  align = "center",
-}: {
-  reverse?: boolean;
-  align?: "start" | "center" | "end";
-}) {
-  const track = [...SONGS, ...SONGS];
-  const alignClass =
-    align === "end" ? "items-end" : align === "start" ? "items-start" : "items-center";
-
+// Single shared background image spanning the gap bands + the dark banner in
+// between. The gaps show it brighter/unobstructed; the middle band darkens it
+// with a near-opaque overlay — same photo throughout, just different tint per
+// zone, which keeps the transition seamless (no mismatched image edges).
+function LPHeroBand() {
   return (
-    <div className={`h-full w-full overflow-hidden flex ${alignClass} pointer-events-none`}>
+    <div className="relative overflow-hidden">
       <div
-        className="flex gap-3 w-max pb-1"
-        style={{
-          animation: "miniMarqueeScroll 70s linear infinite",
-          animationDirection: reverse ? "reverse" : "normal",
-        }}
-      >
-        {track.map((song, i) => (
-          <div
-            key={`${song.id}-${i}`}
-            className="w-16 sm:w-20 flex-shrink-0 aspect-video overflow-hidden grayscale opacity-40"
-          >
-            <img
-              src={`https://img.youtube.com/vi/${song.youtubeId}/hqdefault.jpg`}
-              alt=""
-              className="w-full h-full object-cover"
-              loading="lazy"
-            />
-          </div>
-        ))}
-      </div>
-
-      <style>{`
-        @keyframes miniMarqueeScroll {
-          from { transform: translateX(0); }
-          to   { transform: translateX(-50%); }
-        }
-      `}</style>
-    </div>
-  );
-}
-
-function LPStatsBanner() {
-  return (
-    <section className="relative bg-[#1a1816] text-white overflow-hidden py-16 sm:py-20 px-6 text-center">
-      {/* Lightweight static texture — intentionally not the WebGL water effect used
-          on the home hero, since this page is opened from cold-outreach email links
-          and needs to load fast on unpredictable connections. */}
-      <div
-        className="absolute inset-0 opacity-[0.09]"
+        className="absolute inset-0"
         style={{
           backgroundImage: `url(${avatarSrc})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
-          filter: "blur(5px) grayscale(1)",
+          filter: "grayscale(1) brightness(1.5) blur(2px)",
         }}
       />
-      <div className="absolute top-0 left-0 w-full h-0.5 bg-[#C41E3A]" />
-      <div className="absolute bottom-0 left-0 w-full h-0.5 bg-[#C41E3A]" />
 
-      <FadeIn className="relative z-10 max-w-3xl mx-auto">
-        <div className="inline-flex items-center gap-2 mb-4">
-          <Music2 size={14} className="text-[#C41E3A]" strokeWidth={2} />
-          <span className="text-sm font-bold tracking-[0.15em]">作曲家 - 赤桐ルイ</span>
-        </div>
-        <h1 className="text-2xl sm:text-3xl md:text-4xl font-black leading-snug tracking-tight">
-          TikTokでの制作楽曲の使用
-          <em className="not-italic text-[#C41E3A]"> 3,800件 </em>
-          を突破。累計再生回数は
-          <em className="not-italic text-[#C41E3A]"> 120万回 </em>
-          。
-        </h1>
-        <p className="mt-4 text-xs sm:text-sm font-light text-white/70 leading-relaxed">
-          作詞・作曲・編曲・ミックスマスタリングまで一人で手がける作曲家、赤桐ルイの制作実績です。
-        </p>
-      </FadeIn>
-    </section>
+      {/* Top gap — brighter background shows through unobstructed */}
+      <div className="relative h-32 sm:h-36" />
+
+      {/* Dark banner — near-opaque overlay on the same image, reading as
+          a smaller, darker band framed by the brighter gaps above/below */}
+      <section className="relative py-16 sm:py-20 px-6 text-center text-white">
+        <div className="absolute inset-0 bg-[#1a1816]/90" />
+        <div className="absolute top-0 inset-x-0 h-0.5 bg-[#C41E3A] z-10" />
+        <div className="absolute bottom-0 inset-x-0 h-0.5 bg-[#C41E3A] z-10" />
+
+        <FadeIn className="relative z-10 max-w-3xl mx-auto">
+          <div className="inline-flex items-center gap-2 mb-4">
+            <Music2 size={14} className="text-[#C41E3A]" strokeWidth={2} />
+            <span className="text-sm font-bold tracking-[0.15em]">作曲家 - 赤桐ルイ</span>
+          </div>
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-black leading-snug tracking-tight">
+            TikTokでの制作楽曲の使用
+            <em className="not-italic text-[#C41E3A]"> 3,800件 </em>
+            を突破。累計再生回数は
+            <em className="not-italic text-[#C41E3A]"> 120万回 </em>
+            。
+          </h1>
+          <p className="mt-4 text-xs sm:text-sm font-light text-white/70 leading-relaxed">
+            作詞・作曲・編曲・ミックスマスタリングまで一人で手がける作曲家、赤桐ルイの制作実績です。
+          </p>
+        </FadeIn>
+      </section>
+
+      {/* Bottom gap — brighter background shows through again */}
+      <div className="relative h-16 sm:h-20" />
+    </div>
   );
 }
 
@@ -1521,18 +1495,10 @@ function LandingPage({
 
   return (
     <main className="min-h-screen">
-      {/* Gap above the banner — taller than the fixed nav (64px) so a sliver of
-          background peeks through beneath it, reading as a deliberate seam
-          rather than the nav simply overlapping the dark section. */}
-      <div className="h-32 sm:h-36 bg-background">
-        <MiniThumbMarquee align="end" />
-      </div>
-      <LPStatsBanner />
-      <div className="h-16 sm:h-20 bg-background">
-        <MiniThumbMarquee reverse align="start" />
-      </div>
+      <LPHeroBand />
       <LPFeaturedVideo featured={featured} />
       <LPWorksGrid />
+      <Contact />
     </main>
   );
 }
@@ -1669,6 +1635,7 @@ export default function App() {
       <Footer navigate={navigate} />
       <FloatingContactButton
         forceVisible={isWorks || isHighlight || isLPWorks || isLPHighlight}
+        contactOnSamePage={isLPWorks || isLPHighlight}
         navigate={navigate}
       />
     </div>
