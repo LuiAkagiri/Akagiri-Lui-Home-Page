@@ -1276,14 +1276,14 @@ const LP_FEATURED_WORKS: FeaturedVideoConfig = (() => {
     title: `${song.title} - ${song.artist}`,
     subtitle: `担当：${song.role.split("/").join(" / ")}`,
     tags: song.tags,
-    description: "赤桐ルイ名義としての初リリース楽曲でありながら、TikTokでのUGC投稿数3,800件超え、累計再生回数120万回を突破。デビュー作にしてこの拡散力が、楽曲そのものの強さを物語っています。",
+    description: "赤桐ルイ名義としての初リリース楽曲でありながら、TikTokでのUGC投稿数3,800件超え、累計再生回数120万回を突破。",
   };
 })();
 
 // 楽曲制作実績ハイライト（まとめ動画）を主役にしたLP用データ
 const LP_FEATURED_HIGHLIGHT: FeaturedVideoConfig = {
   youtubeId: "cHPqaAiqZWQ",
-  title: "3分半で楽曲制作実績を一部ご紹介",
+  title: "【3分半】制作実績を一部ご紹介",
   description: "王道の可愛い系ソングから、エモーショナルなバラード、疾走感のあるバンドサウンドまで。特定のジャンルに偏らない幅広い制作力で、アーティストごとの個性に寄り添った楽曲を届けています。",
 };
 
@@ -1303,6 +1303,7 @@ function LPStatsBanner() {
         }}
       />
       <div className="absolute top-0 left-0 w-full h-0.5 bg-[#C41E3A]" />
+      <div className="absolute bottom-0 left-0 w-full h-0.5 bg-[#C41E3A]" />
 
       <FadeIn className="relative z-10 max-w-3xl mx-auto">
         <div className="inline-flex items-center gap-2 mb-4">
@@ -1327,44 +1328,52 @@ function LPStatsBanner() {
 function LPFeaturedVideo({ featured }: { featured: FeaturedVideoConfig }) {
   return (
     <section className="py-20 px-6 bg-secondary border-t border-border">
-      <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-14 items-center">
-        <FadeIn>
-          <div className="relative w-full bg-black" style={{ paddingTop: "56.25%" }}>
-            <iframe
-              src={`https://www.youtube.com/embed/${featured.youtubeId}?enablejsapi=1`}
-              title={featured.title}
-              className="absolute inset-0 w-full h-full"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            />
-          </div>
-        </FadeIn>
-        <FadeIn delay={100}>
+      <div className="max-w-5xl mx-auto">
+        <FadeIn className="text-center mb-14">
           <SectionLabel>Featured</SectionLabel>
-          <h2 className="text-2xl md:text-3xl font-black text-foreground tracking-tight mb-3 leading-snug">
-            {featured.title}
+          <h2 className="text-3xl md:text-4xl font-black text-foreground tracking-tight">
+            まずはこちらから
           </h2>
-          {featured.subtitle && (
-            <p className="text-xs font-medium text-[#C41E3A] tracking-wide mb-4">
-              {featured.subtitle}
-            </p>
-          )}
-          <p className="text-sm font-light text-foreground leading-relaxed whitespace-pre-line">
-            {featured.description}
-          </p>
-          {featured.tags && (
-            <div className="flex flex-wrap gap-1.5 mt-5">
-              {featured.tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="text-[10px] font-medium bg-background text-muted-foreground px-2 py-0.5 tracking-wide border border-border"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-          )}
         </FadeIn>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-14 items-center">
+          <FadeIn>
+            <div className="relative w-full bg-black" style={{ paddingTop: "56.25%" }}>
+              <iframe
+                src={`https://www.youtube.com/embed/${featured.youtubeId}?enablejsapi=1`}
+                title={featured.title}
+                className="absolute inset-0 w-full h-full"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            </div>
+          </FadeIn>
+          <FadeIn delay={100}>
+            <h3 className="text-lg md:text-xl font-black text-foreground tracking-tight mb-3 leading-snug">
+              {featured.title}
+            </h3>
+            {featured.subtitle && (
+              <p className="text-xs font-medium text-[#C41E3A] tracking-wide mb-4">
+                {featured.subtitle}
+              </p>
+            )}
+            <p className="text-sm font-light text-foreground leading-relaxed whitespace-pre-line">
+              {featured.description}
+            </p>
+            {featured.tags && (
+              <div className="flex flex-wrap gap-1.5 mt-5">
+                {featured.tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="text-[10px] font-medium bg-background text-muted-foreground px-2 py-0.5 tracking-wide border border-border"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
+          </FadeIn>
+        </div>
       </div>
     </section>
   );
@@ -1467,7 +1476,7 @@ function LandingPage({
       {/* Gap above the banner — taller than the fixed nav (64px) so a sliver of
           background peeks through beneath it, reading as a deliberate seam
           rather than the nav simply overlapping the dark section. */}
-      <div className="h-20 sm:h-24 bg-background" />
+      <div className="h-32 sm:h-36 bg-background" />
       <LPStatsBanner />
       <div className="h-16 sm:h-20 bg-background" />
       <LPFeaturedVideo featured={featured} />
