@@ -1342,8 +1342,6 @@ function LPHeroBand() {
         </FadeIn>
       </section>
 
-      {/* Bottom gap — shrunk to 1/3 (64/80 → ~21/27px) */}
-      <div className="h-[21px] sm:h-[27px] bg-background" />
     </div>
   );
 }
