@@ -1302,26 +1302,27 @@ const LP_FEATURED_HIGHLIGHT: FeaturedVideoConfig = {
 // zone, which keeps the transition seamless (no mismatched image edges).
 function LPHeroBand() {
   return (
-    <div className="relative overflow-hidden">
-      <div
-        className="absolute inset-0"
-        style={{
-          backgroundImage: `url(${avatarSrc})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          filter: "grayscale(1) brightness(1.5) blur(2px)",
-        }}
-      />
+    <div>
+      {/* Top gap — shrunk to 1/3 of the original (128/144 → ~43/48px). The
+          removed height is added onto the banner's own top padding below, so
+          the combined total (gap + banner + gap) stays constant overall. */}
+      <div className="h-[43px] sm:h-12 bg-background" />
 
-      {/* Top gap — brighter background shows through unobstructed */}
-      <div className="relative h-32 sm:h-36" />
-
-      {/* Dark banner — near-opaque overlay on the same image, reading as
-          a smaller, darker band framed by the brighter gaps above/below */}
-      <section className="relative py-16 sm:py-20 px-6 text-center text-white">
-        <div className="absolute inset-0 bg-[#1a1816]/90" />
-        <div className="absolute top-0 inset-x-0 h-0.5 bg-[#C41E3A] z-10" />
-        <div className="absolute bottom-0 inset-x-0 h-0.5 bg-[#C41E3A] z-10" />
+      <section className="relative bg-[#1a1816] text-white overflow-hidden pt-[149px] pb-[107px] sm:pt-[176px] sm:pb-[133px] px-6 text-center">
+        {/* Lightweight static texture — intentionally not the WebGL water effect used
+            on the home hero, since this page is opened from cold-outreach email links
+            and needs to load fast on unpredictable connections. */}
+        <div
+          className="absolute inset-0 opacity-[0.09]"
+          style={{
+            backgroundImage: `url(${avatarSrc})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            filter: "blur(5px) grayscale(1)",
+          }}
+        />
+        <div className="absolute top-0 left-0 w-full h-0.5 bg-[#C41E3A]" />
+        <div className="absolute bottom-0 left-0 w-full h-0.5 bg-[#C41E3A]" />
 
         <FadeIn className="relative z-10 max-w-3xl mx-auto">
           <div className="inline-flex items-center gap-2 mb-4">
@@ -1341,8 +1342,8 @@ function LPHeroBand() {
         </FadeIn>
       </section>
 
-      {/* Bottom gap — brighter background shows through again */}
-      <div className="relative h-16 sm:h-20" />
+      {/* Bottom gap — shrunk to 1/3 (64/80 → ~21/27px) */}
+      <div className="h-[21px] sm:h-[27px] bg-background" />
     </div>
   );
 }
