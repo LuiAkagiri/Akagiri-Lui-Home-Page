@@ -133,7 +133,7 @@ const SONGS: Song[] = [
     id: "10",
     title: "Little Brave Story",
     artist: "このアイドルはフィクションです。",
-    role: "編曲",
+    role: "編曲（共作）",
     tags: ["アイドル"],
     youtubeId: "ksJ0IlLsYWo",
   },
@@ -153,6 +153,14 @@ const SONGS: Song[] = [
     tags: ["アイドル", "可愛い系", "バンド系"],
     youtubeId: "oTuvE_5jqdw",
     featured: true,
+  },
+  {
+    id: "13",
+    title: "夏のラブソング",
+    artist: "Mecori",
+    role: "作曲/編曲/ミックス",
+    tags: ["VTuber", "バンド系"],
+    youtubeId: "ebhIt2K0xYw",
   },
 ];
 
@@ -1277,16 +1285,30 @@ interface FeaturedVideoConfig {
   description: string;
 }
 
-// かまちょ注意報！を主役にしたLP用データ（曲データからそのまま組み立て）
-const LP_FEATURED_WORKS: FeaturedVideoConfig = (() => {
-  const song = SONGS.find((s) => s.id === "1")!;
-  return {
-    youtubeId: song.youtubeId,
-    title: `${song.title} - ${song.artist}`,
-    subtitle: `担当：${song.role.split("/").join(" / ")}`,
-    tags: song.tags,
-    description: "赤桐ルイ名義としての初リリース楽曲でありながら、TikTokでのUGC投稿数3,800件超え、累計再生回数120万回を突破。",
+// lp-worksの「まずはこちらから」用データ（2曲、交互レイアウトで表示）
+// 1本目:君がいるだけでフルコンボ／2本目:かまちょ注意報！
+const LP_FEATURED_WORKS_LIST: FeaturedVideoConfig[] = (() => {
+  const buildFromSong = (id: string, description: string): FeaturedVideoConfig => {
+    const song = SONGS.find((s) => s.id === id)!;
+    return {
+      youtubeId: song.youtubeId,
+      title: `${song.title} - ${song.artist}`,
+      subtitle: `担当：${song.role.split("/").join(" / ")}`,
+      tags: song.tags,
+      description,
+    };
   };
+
+  return [
+    buildFromSong(
+      "12",
+      "王道アイドルソングの高揚感とキャッチーさを軸に、作詞・作曲・編曲・ミックスまで一貫制作。聴くたびに応援したくなる、アイドルシーンならではの世界観を届けています。"
+    ),
+    buildFromSong(
+      "1",
+      "赤桐ルイ名義としての初リリース楽曲でありながら、TikTokでのUGC投稿数3,800件超え、累計再生回数120万回を突破。"
+    ),
+  ];
 })();
 
 // 楽曲制作実績ハイライト（まとめ動画）を主役にしたLP用データ
@@ -1346,7 +1368,7 @@ function LPHeroBand() {
   );
 }
 
-function LPFeaturedVideo({ featured }: { featured: FeaturedVideoConfig }) {
+function LPFeaturedVideo({ items }: { items: FeaturedVideoConfig[] }) {
   return (
     <section className="py-20 px-6 bg-secondary border-t border-border">
       <div className="max-w-5xl mx-auto">
@@ -1357,43 +1379,53 @@ function LPFeaturedVideo({ featured }: { featured: FeaturedVideoConfig }) {
           </h2>
         </FadeIn>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-14 items-center">
-          <FadeIn>
-            <div className="relative w-full bg-black" style={{ paddingTop: "56.25%" }}>
-              <iframe
-                src={`https://www.youtube.com/embed/${featured.youtubeId}?enablejsapi=1`}
-                title={featured.title}
-                className="absolute inset-0 w-full h-full"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              />
-            </div>
-          </FadeIn>
-          <FadeIn delay={100}>
-            <h3 className="text-lg md:text-xl font-black text-foreground tracking-tight mb-3 leading-snug">
-              {featured.title}
-            </h3>
-            {featured.subtitle && (
-              <p className="text-xs font-medium text-[#C41E3A] tracking-wide mb-4">
-                {featured.subtitle}
-              </p>
-            )}
-            <p className="text-sm font-light text-foreground leading-relaxed whitespace-pre-line">
-              {featured.description}
-            </p>
-            {featured.tags && (
-              <div className="flex flex-wrap gap-1.5 mt-5">
-                {featured.tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="text-[10px] font-medium bg-background text-muted-foreground px-2 py-0.5 tracking-wide border border-border"
-                  >
-                    {tag}
-                  </span>
-                ))}
+        <div className="flex flex-col gap-16 md:gap-20">
+          {items.map((featured, i) => {
+            const reversed = i % 2 === 1;
+            return (
+              <div
+                key={`${featured.youtubeId}-${i}`}
+                className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-14 items-center"
+              >
+                <FadeIn className={reversed ? "md:order-2" : ""}>
+                  <div className="relative w-full bg-black" style={{ paddingTop: "56.25%" }}>
+                    <iframe
+                      src={`https://www.youtube.com/embed/${featured.youtubeId}?enablejsapi=1`}
+                      title={featured.title}
+                      className="absolute inset-0 w-full h-full"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
+                  </div>
+                </FadeIn>
+                <FadeIn delay={100} className={reversed ? "md:order-1" : ""}>
+                  <h3 className="text-lg md:text-xl font-black text-foreground tracking-tight mb-3 leading-snug">
+                    {featured.title}
+                  </h3>
+                  {featured.subtitle && (
+                    <p className="text-xs font-medium text-[#C41E3A] tracking-wide mb-4">
+                      {featured.subtitle}
+                    </p>
+                  )}
+                  <p className="text-sm font-light text-foreground leading-relaxed whitespace-pre-line">
+                    {featured.description}
+                  </p>
+                  {featured.tags && (
+                    <div className="flex flex-wrap gap-1.5 mt-5">
+                      {featured.tags.map((tag) => (
+                        <span
+                          key={tag}
+                          className="text-[10px] font-medium bg-background text-muted-foreground px-2 py-0.5 tracking-wide border border-border"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </FadeIn>
               </div>
-            )}
-          </FadeIn>
+            );
+          })}
         </div>
       </div>
     </section>
@@ -1457,10 +1489,10 @@ function LPWorksGrid() {
 
 function LandingPage({
   title,
-  featured,
+  featuredItems,
 }: {
   title: string;
-  featured: FeaturedVideoConfig;
+  featuredItems: FeaturedVideoConfig[];
 }) {
   // Same hidden-page pattern as HighlightPage: noindex + distinct tab title
   // only while mounted, restored on unmount.
@@ -1495,7 +1527,7 @@ function LandingPage({
   return (
     <main className="min-h-screen">
       <LPHeroBand />
-      <LPFeaturedVideo featured={featured} />
+      <LPFeaturedVideo items={featuredItems} />
       <LPWorksGrid />
       <Contact />
     </main>
@@ -1503,11 +1535,11 @@ function LandingPage({
 }
 
 function LPWorksPage() {
-  return <LandingPage title="制作実績" featured={LP_FEATURED_WORKS} />;
+  return <LandingPage title="制作実績" featuredItems={LP_FEATURED_WORKS_LIST} />;
 }
 
 function LPHighlightPage() {
-  return <LandingPage title="制作実績ハイライト" featured={LP_FEATURED_HIGHLIGHT} />;
+  return <LandingPage title="制作実績ハイライト" featuredItems={[LP_FEATURED_HIGHLIGHT]} />;
 }
 
 // ─── Works Page ───────────────────────────────────────────────────────────────
