@@ -162,6 +162,14 @@ const SONGS: Song[] = [
     tags: ["VTuber", "バンド系"],
     youtubeId: "ebhIt2K0xYw",
   },
+  {
+    id: "14",
+    title: "拝啓、地球より",
+    artist: "ちゅんちゅんこやぎ",
+    role: "作曲/編曲/ミックス",
+    tags: ["VTuber", "バラード系"],
+    youtubeId: "HfgCh5wt9xk",
+  },
 ];
 
 // ─── Hooks ───────────────────────────────────────────────────────────────────
