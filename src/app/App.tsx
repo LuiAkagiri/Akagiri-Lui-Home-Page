@@ -709,12 +709,12 @@ function Hero() {
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-black leading-[1.2] tracking-tight text-foreground mt-2">
             TikTokでの制作楽曲の使用
             <br />
-            <em className="not-italic text-[#C41E3A]">3,800件</em>を突破。
+            <em className="not-italic text-[#C41E3A]">4,000件</em>を突破。
           </h1>
 
           <p className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight text-foreground mt-3">
             累計再生回数は
-            <em className="not-italic text-[#C41E3A]">120万回</em>
+            <em className="not-italic text-[#C41E3A]">150万回</em>
             を記録。
           </p>
 
@@ -783,7 +783,7 @@ function Profile() {
               作詞家 / 作曲家 / 編曲家
             </p>
             <p className="text-sm font-light text-foreground leading-[2] text-left">
-              自身名義の初リリース曲は、TikTokでのUGC使用3,800件を突破。UGC累計再生回数は120万回を記録。5歳よりピアノを学び、10代で作曲をはじめ、作詞・作曲・編曲・ミックスマスタリングまで、楽曲制作のすべての工程を一人で手がける。J-POP、バンドサウンドを軸に、エレクトロ、バラードまでジャンルを問わず制作。VTuber、アイドルシーンを中心に楽曲を提供している。
+              自身名義の初リリース曲は、TikTokでのUGC使用4,000件を突破。UGC累計再生回数は150万回を記録。5歳よりピアノを学び、10代で作曲をはじめ、作詞・作曲・編曲・ミックスマスタリングまで、楽曲制作のすべての工程を一人で手がける。J-POP、バンドサウンドを軸に、エレクトロ、バラードまでジャンルを問わず制作。VTuber、アイドルシーンを中心に楽曲を提供している。
             </p>
           </div>
         </FadeIn>
@@ -1322,7 +1322,7 @@ const LP_FEATURED_WORKS_LIST: FeaturedVideoConfig[] = (() => {
     ),
     buildFromSong(
       "1",
-      "赤桐ルイ名義としての初リリース楽曲でありながら、TikTokでのUGC投稿数3,800件超え、累計再生回数120万回を突破。"
+      "赤桐ルイ名義としての初リリース楽曲でありながら、TikTokでのUGC投稿数4,000件超え、累計再生回数150万回を突破。"
     ),
   ];
 })();
@@ -1369,9 +1369,9 @@ function LPHeroBand() {
           </div>
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-black leading-snug tracking-tight">
             TikTokでの制作楽曲の使用
-            <em className="not-italic text-[#C41E3A]"> 3,800件 </em>
+            <em className="not-italic text-[#C41E3A]"> 4,000件 </em>
             を突破。累計再生回数は
-            <em className="not-italic text-[#C41E3A]"> 120万回 </em>
+            <em className="not-italic text-[#C41E3A]"> 150万回 </em>
             。
           </h1>
           <p className="mt-4 text-xs sm:text-sm font-light text-white/70 leading-relaxed">
