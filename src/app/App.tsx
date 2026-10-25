@@ -170,6 +170,14 @@ const SONGS: Song[] = [
     tags: ["VTuber", "バラード系"],
     youtubeId: "HfgCh5wt9xk",
   },
+  {
+    id: "15",
+    title: "Daylight Fireworks",
+    artist: "飛鳴りんつ",
+    role: "作曲/編曲",
+    tags: ["VTuber", "かっこいい系", "バンド系"],
+    youtubeId: "Ivb1erj0KUM",
+  },
 ];
 
 // ─── Hooks ───────────────────────────────────────────────────────────────────
